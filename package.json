@@ -1,0 +1,79 @@
+{
+  "name": "hug-reports",
+  "displayName": "Hug Reports",
+  "description": "Express appreciation to open source contributors",
+  "version": "1.0.0",
+  "files": [
+    "images/*.png"
+  ],
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:python",
+    "onLanguage:typescript",
+    "onLanguage:javascript"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "hug-reports.showHelloWorld",
+        "title": "Hello World (React + CRA): Show"
+      },
+      {
+        "command": "hug-reports.sayThanks",
+        "title": "Say Thanks"
+      },
+      {
+        "command": "hug-reports.sayMore",
+        "title": "Say More"
+      }
+    ],
+    "menus": {
+      "editor/lineNumber/context": [
+        {
+          "command": "hug-reports.sayThanks",
+          "title": "Say Thanks",
+          "group": "navigation",
+          "when": "hug-reports.hasImport"
+        },
+        {
+          "command": "hug-reports.sayMore",
+          "title": "Say More",
+          "group": "navigation",
+          "when": "hug-reports.hasImport"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "install:all": "npm install && cd webview-ui && npm install",
+    "start:webview": "cd webview-ui && npm run start",
+    "build:webview": "cd webview-ui && npm run build",
+    "test:webview": "cd webview-ui && npm run test",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.3",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.46.0",
+    "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/parser": "^4.14.1",
+    "eslint": "^7.19.0",
+    "glob": "^7.1.6",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.3",
+    "vscode-test": "^1.5.0"
+  },
+  "dependencies": {
+    "mongodb": "^5.7.0"
+  }
+}
