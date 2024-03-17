@@ -7,7 +7,7 @@
 git clone https://github.com/Hug-Reports/hug-reports-extension.git
 
 # Navigate into sample directory
-cd hello-world
+cd hug-reports-extension
 
 # Install dependencies for both the extension and webview UI source code
 npm run install:all
