@@ -214,19 +214,22 @@ function extractNames(document: vscode.TextDocument) {
   let namesSet: Set<string> = new Set();
 
   if (document.languageId === "python") {
-    const pyImportRegex = /^(\s*(?:from\s+[\w\.]+)?\s*import\s+[\w\*\, ]+(?:\s+as\s+[\w]+)?)\b/gm;
+    const pyImportRegex = /^(\h*(?:from[^\S\r\n]+([\w]+|\.)[^\S\r\n]+)?import[^\S\r\n]+(([\w]+\b|\*)(?:[^\S\r\n]+as[^\S\r\n]+([\w]+\b|\*))?)+)/gm;
     while ((match = pyImportRegex.exec(document.getText()))) {
       lineNumbers.push(document.positionAt(match.index).line);
 
       const importStatement = match[1].trim();
+      console.log(importStatement);
       const statements = importStatement
         .split(/^(?:import|from)\s+/)[1]
         .split(/\s*,\s*/)
         .map((item) => item.trim());
+        console.log(statements);
       statements.forEach((item) => {
         const namesSplitByAs = item.split(/\s+as\s+/);
         if (namesSplitByAs.length === 1) {
           const name = namesSplitByAs[0];
+          console.log(name);
           if (name.includes("import")) {
             namesSet.add(name.split(/\s+import\s+/)[1]);
           } else {
@@ -234,22 +237,26 @@ function extractNames(document: vscode.TextDocument) {
           }
         } else {
           namesSet.add(namesSplitByAs[1]);
+          console.log(namesSplitByAs[1]);
         }
       });
     }
-  } else if (document.languageId === "javascript" || document.languageId == "typescript") {
-    const jsImportRegex = /^import\s+.*\s+from\s+['"](.*)['"]/gm;
+  } else if (document.languageId === "javascript" || document.languageId === "typescript") {
+    const jsImportRegex = /^import\s+(.*\s+from\s+)?['"](.*)['"]/gm;
     while ((match = jsImportRegex.exec(document.getText()))) {
-      const fromSplit = match[0].split(/\s+from\s+/);
-      if (
-        fromSplit[1].trim().startsWith('"./') ||
-        fromSplit[1].trim().startsWith('"/') ||
-        fromSplit[1].trim().startsWith("'./") ||
-        fromSplit[1].trim().startsWith("'/")
-      ) {
-        continue;
-      }
       lineNumbers.push(document.positionAt(match.index).line);
+      
+      if (/(\s+from+\s+)/.test(match[0])){
+        const fromSplit = match[0].split(/\s+from\s+/);
+        if (
+          fromSplit[1].trim().startsWith('"./') ||
+          fromSplit[1].trim().startsWith('"/') ||
+          fromSplit[1].trim().startsWith("'./") ||
+          fromSplit[1].trim().startsWith("'/")
+        ) {
+        continue;
+        }
+        lineNumbers.push(document.positionAt(match.index).line);
       const statements = fromSplit[0]
         .split(/\s*import\s+/)[1]
         .split(/\s*,\s*/)
@@ -265,7 +272,19 @@ function extractNames(document: vscode.TextDocument) {
           namesSet.add(item);
         }
       });
+      } else {
+        const importStatement = match[2];
+        if (
+          importStatement.trim().startsWith('"./') ||
+          importStatement.trim().startsWith('"/') ||
+          importStatement.trim().startsWith("'./") ||
+          importStatement.trim().startsWith("'/")
+        ) {
+        continue;
+        }
+      }
     }
+    
 
     const jsRequireRegex =
       /(const|let)\s+\{?\s*([\w,\s]+)\s*\}?\s*=\s*require\s*\(\s*['"]([^'"]+)['"]\s*\)[^;]*;/g;
@@ -282,6 +301,14 @@ function extractNames(document: vscode.TextDocument) {
       }
     }
   }
+
+  if (lineNumbers.length === 0) {
+    hasImport = false;
+  } else {
+    hasImport = true;
+  }
+
+  return lineNumbers;
 
   let names: string[] = Array.from(namesSet);
 
