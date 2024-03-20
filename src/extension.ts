@@ -55,6 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   detectColorTheme();
+  console.log(currentColorTheme);
   // Listen for changes in the color theme
   vscode.workspace.onDidChangeConfiguration((event) => {
     if (event.affectsConfiguration("workbench.colorTheme")) {
@@ -318,11 +319,15 @@ function extractNames(document: vscode.TextDocument) {
 function detectColorTheme() {
   currentColorTheme = vscode.workspace.getConfiguration("workbench").get("colorTheme");
 
-  if (currentColorTheme?.includes("Light")) {
+  console.log(currentColorTheme);
+
+  if (currentColorTheme?.includes("light") || currentColorTheme?.includes("Light")) {
     currentColorTheme = "light";
   } else {
     currentColorTheme = "dark";
   }
+
+  console.log(currentColorTheme);
 }
 
 async function createUserMongoDB() {
