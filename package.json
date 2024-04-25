@@ -31,6 +31,10 @@
       {
         "command": "hug-reports.sayMore",
         "title": "Say More"
+      },
+      {
+        "command": "hug-reports.openDashboard",
+        "title": "Open Dashboard"
       }
     ],
     "menus": {
@@ -44,6 +48,12 @@
         {
           "command": "hug-reports.sayMore",
           "title": "Say More",
+          "group": "navigation",
+          "when": "hug-reports.hasImport"
+        },
+        {
+          "command": "hug-reports.openDashboard",
+          "title": "Open Dashboard",
           "group": "navigation",
           "when": "hug-reports.hasImport"
         }
@@ -74,6 +84,7 @@
     "vscode-test": "^1.5.0"
   },
   "dependencies": {
+    "@fluentui/react-components": "^9.47.5",
     "mongodb": "^5.7.0"
   }
 }

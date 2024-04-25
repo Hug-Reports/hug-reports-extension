@@ -68,6 +68,7 @@ export class HelloWorldPanel {
         localResourceRoots: [
           Uri.joinPath(extensionUri, "out"),
           Uri.joinPath(extensionUri, "webview-ui/build"),
+          Uri.joinPath(extensionUri, "images")
         ],
       }
     );
@@ -127,7 +128,20 @@ export class HelloWorldPanel {
       this._lineofcode
     )};</script>`;
 
+    /*
+    const lineChartPath = getUri(webview, extensionUri, [
+      "images",
+      "line-chart.png",
+    ]);
+    const linechartSrc = webview.asWebviewUri(lineChartPath);
+
+    console.log(linechartSrc);
+
+    const imageScript = `<script nonce="${nonce}">window.image = ${linechartSrc};</script>`;
+    */
+
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
+    // <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
     return /*html*/ `
       <!DOCTYPE html>
       <html lang="en">
@@ -135,7 +149,6 @@ export class HelloWorldPanel {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
           <meta name="theme-color" content="#000000">
-          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
           <link rel="stylesheet" type="text/css" href="${stylesUri}">
           <title>Hello World</title>
         </head>

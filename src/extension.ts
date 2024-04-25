@@ -27,6 +27,13 @@ let hasImport: boolean = false;
 const uri =
   "mongodb+srv://olivia:MA1T5GaLPzIPphQy@researchcluster.zvvxxis.mongodb.net/?retryWrites=true&w=majority";
 
+interface PackageDictionary {
+  lineNumber: number;
+  name: string;
+}
+
+type packageDict = PackageDictionary[];
+
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -36,11 +43,26 @@ const client = new MongoClient(uri, {
   },
 });
 
+interface additionalData {
+  userid: string;
+  linetext: string;
+  packages: string[];
+  tab: string;
+  button: string;
+  modules: object;
+}
+
+type AddData = additionalData;
+
 export function activate(context: vscode.ExtensionContext) {
   // Create the show hello world command
-  const dummydata = {
+  let dummydata: AddData = {
     userid: "Pranav",
     linetext: "",
+    packages: [],
+    tab: "",
+    button: "",
+    modules: {}
   };
 
   globalState = context.globalState;
@@ -55,7 +77,6 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   detectColorTheme();
-  console.log(currentColorTheme);
   // Listen for changes in the color theme
   vscode.workspace.onDidChangeConfiguration((event) => {
     if (event.affectsConfiguration("workbench.colorTheme")) {
@@ -76,7 +97,8 @@ export function activate(context: vscode.ExtensionContext) {
   if (activeEditor) {
     const { document } = activeEditor;
 
-    let lineNumbers = extractNames(document);
+    let lineNumberNames = extractNames(document);
+    lineNumberNames.map((linePair) => (lineNumbers.push(linePair.lineNumber)));
 
     // Add decorations to matching lines
     lineDecorations = lineNumbers.map((lineNumber) => ({
@@ -97,7 +119,8 @@ export function activate(context: vscode.ExtensionContext) {
       activeEditor.setDecorations(lightDecoration, []);
       activeEditor.setDecorations(darkDecoration, []);
 
-      let lineNumbers: number[] = extractNames(document);
+      let lineNumberNames = extractNames(document);
+      lineNumberNames.map((linePair) => (lineNumbers.push(linePair.lineNumber)));
 
       // Add decorations to matching lines
       lineDecorations = lineNumbers.map((lineNumber) => ({
@@ -121,7 +144,10 @@ export function activate(context: vscode.ExtensionContext) {
       editor.setDecorations(lightDecoration, []);
       editor.setDecorations(darkDecoration, []);
 
-      let lineNumbers: number[] = extractNames(document);
+      let lineNumberNames = extractNames(document);
+      lineNumbers = [];
+      lineNumberNames.map((linePair) => (lineNumbers.push(linePair.lineNumber)));
+
 
       // Add decorations to matching lines
       lineDecorations = lineNumbers.map((lineNumber) => ({
@@ -156,8 +182,24 @@ export function activate(context: vscode.ExtensionContext) {
           console.log("Line number: " + args.lineNumber);
           dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
           console.log("dummy " + dummydata.linetext);
+
+          let lineNumberNames = extractNames(activeEditor.document);
+          let lineArray = lineNumberNames.filter(entry => entry['lineNumber'] === args.lineNumber - 1);
+          console.log(lineArray);
+          let packagesList : string[] = [];
+          lineArray.map(packaged => packagesList.push(packaged.name));
+          dummydata.packages = packagesList;
+          console.log(dummydata.packages);
         }
       }
+      let allModules: { [key: string]: string[] } = {};
+      let document = activeEditor.document;
+      dummydata.packages.forEach(packagename => {
+        allModules[packagename] = extractModules(document, packagename);
+      });
+      dummydata.modules = allModules;
+      console.log(dummydata.modules);
+
     }
     if (!activeEditor) {
       if (args) {
@@ -165,8 +207,71 @@ export function activate(context: vscode.ExtensionContext) {
         const document = await vscode.workspace.openTextDocument(args.uri);
         dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
         console.log("dummy " + dummydata.linetext);
+
+        let lineNumberNames = extractNames(document);
+        let lineArray = lineNumberNames.filter(entry => entry['lineNumber'] === args.lineNumber - 1);
+        let packagesList : string[] = [];
+        lineArray.map(packaged => packagesList.push(packaged.name));
+        dummydata.packages = packagesList;
+
+        const allModules: { [key: string]: string[] } = {};
+        dummydata.packages.forEach(packagename => {
+          allModules[packagename] = extractModules(document, packagename);
+        });
+        dummydata.modules = allModules;
       }
     }
+    dummydata.tab = "form";
+    dummydata.button = "form";
+
+    HelloWorldPanel.render(context.extensionUri, dummydata);
+  });
+
+  const openDashboardCommand = vscode.commands.registerCommand("hug-reports.openDashboard", async (args) => {
+    if (activeEditor) {
+      if (args) {
+        if (args.lineNumber) {
+          console.log("Line number: " + args.lineNumber);
+          dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
+          console.log("dummy " + dummydata.linetext);
+
+          let lineNumberNames = extractNames(activeEditor.document);
+          let lineArray = lineNumberNames.filter(entry => entry['lineNumber'] === args.lineNumber - 1);
+          let packagesList : string[] = [];
+          lineArray.map(packaged => packagesList.push(packaged.name));
+          dummydata.packages = packagesList;
+        }
+      }
+      let allModules: { [key: string]: string[] } = {};
+      let document = activeEditor.document;
+      dummydata.packages.forEach(packagename => {
+        allModules[packagename] = extractModules(document, packagename);
+      });
+      dummydata.modules = allModules;
+      console.log(dummydata.modules);
+    }
+    if (!activeEditor) {
+      if (args) {
+        console.log("No active editor");
+        const document = await vscode.workspace.openTextDocument(args.uri);
+        dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
+        console.log("dummy " + dummydata.linetext);
+
+        let lineNumberNames = extractNames(document);
+        let lineArray = lineNumberNames.filter(entry => entry['lineNumber'] === args.lineNumber - 1);
+        let packagesList : string[] = [];
+        lineArray.map(packaged => packagesList.push(packaged.name));
+        dummydata.packages = packagesList;
+
+        let allModules: { [key: string]: string[] } = {};
+        dummydata.packages.forEach(packagename => {
+          allModules[packagename] = extractModules(document, packagename);
+        });
+        dummydata.modules = allModules;
+      }
+    }
+    dummydata.tab = "recently thanked";
+    dummydata.button = "dashboard";
     HelloWorldPanel.render(context.extensionUri, dummydata);
   });
 
@@ -177,13 +282,31 @@ export function activate(context: vscode.ExtensionContext) {
       if (activeEditor) {
         activeLine = activeEditor.document.lineAt(args.lineNumber - 1).text;
         dummydata.linetext = activeLine;
-        const data = {
-          lineNumber,
-          activeLine,
-          timestamp: new Date(),
-          userId: id,
-        };
-        await saveResponseToMongoDB(data);
+        
+
+        let lineNumberNames = extractNames(activeEditor.document);
+        let lineArray = lineNumberNames.filter(entry => entry['lineNumber'] === args.lineNumber - 1);
+        lineArray.map(packaged => dummydata.packages.push(packaged.name));
+
+        
+        let allModules: { [key: string]: string[] } = {};
+        let document = activeEditor.document;
+        dummydata.packages.forEach(packagename => {
+          allModules[packagename] = extractModules(document, packagename);
+        });
+        dummydata.modules = allModules;
+
+        dummydata.packages.forEach(async packagename => {
+          const data = {
+            lineNumber,
+            packagename,
+            timestamp: new Date(),
+            userId: id,
+          };
+  
+          await saveResponseToMongoDB(data);
+        });
+        
         const additionalMessage =
           "Your thanks has been sent! If you feel inspired to share more, don't hesitate to send a note to the contributors. Your words of encouragement can make a world of difference and let them know just how much their efforts are valued.";
         const sayMore = "Say More";
@@ -192,6 +315,7 @@ export function activate(context: vscode.ExtensionContext) {
           .then((selectedAction) => {
             if (selectedAction && selectedAction.title === sayMore) {
               vscode.commands.executeCommand(`hug-reports.sayMore`);
+              console.log("saying more");
             }
           });
       }
@@ -202,6 +326,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(showHelloWorldCommand);
   context.subscriptions.push(sayThanksCommand);
   context.subscriptions.push(sayMoreCommand);
+  context.subscriptions.push(openDashboardCommand);
 }
 
 export function deactivate() {
@@ -210,14 +335,16 @@ export function deactivate() {
 }
 
 function extractNames(document: vscode.TextDocument) {
-  lineNumbers = [];
+  let lineNumbersName: packageDict = [];
   let match: RegExpExecArray | null;
-  let namesSet: Set<string> = new Set();
 
   if (document.languageId === "python") {
-    const pyImportRegex = /^(\s*(?:from\s+[\w\.]+)?\s*import\s+[\w\*\, ]+(?:\s+as\s+[\w]+)?)\b/gm;
+    //const pyImportRegex = /^(\s*(?:from\s+[\w\.]+)?\s*import\s+[\w\*\, ]+(?:\s+as\s+[\w]+)?)\b/gm;
+    //const pyImportRegex = /^import\s*\S*|^from\s*\S*\s*import\s*\S*/gm;
+    //const pyImportRegex = /^(\h*(?:from[^\S\r\n]+([\w]+|\.)[^\S\r\n]+)?import[^\S\r\n]+(([\w]+\b|\*)(?:[^\S\r\n]+as[^\S\r\n]+([\w]+\b|\*))?)+)/gm;
+    const pyImportRegex = /^(\h*(?:from[^\S\r\n]+([\w.]+)[^\S\r\n]+)?import[^\S\r\n]+(([\w]+|\*)(?:[^\S\r\n]+as[^\S\r\n]+([\w]+))?)(?:,[^\S\r\n]+(([\w]+|\*)(?:[^\S\r\n]+as[^\S\r\n]+([\w]+))?))*)/gm;
     while ((match = pyImportRegex.exec(document.getText()))) {
-      lineNumbers.push(document.positionAt(match.index).line);
+      const lineNumber = document.positionAt(match.index).line;
 
       const importStatement = match[1].trim();
       const statements = importStatement
@@ -229,16 +356,16 @@ function extractNames(document: vscode.TextDocument) {
         if (namesSplitByAs.length === 1) {
           const name = namesSplitByAs[0];
           if (name.includes("import")) {
-            namesSet.add(name.split(/\s+import\s+/)[1]);
+            lineNumbersName.push({ lineNumber: lineNumber, name: name.split(/\s+import\s+/)[1] });
           } else {
-            namesSet.add(name);
+            lineNumbersName.push({ lineNumber: lineNumber, name: name });
           }
         } else {
-          namesSet.add(namesSplitByAs[1]);
+          lineNumbersName.push({ lineNumber: lineNumber, name: namesSplitByAs[1] });
         }
       });
     }
-  } else if (document.languageId === "javascript" || document.languageId == "typescript") {
+  } else if (document.languageId === "javascript" || document.languageId === "typescript") {
     const jsImportRegex = /^import\s+.*\s+from\s+['"](.*)['"]/gm;
     while ((match = jsImportRegex.exec(document.getText()))) {
       const fromSplit = match[0].split(/\s+from\s+/);
@@ -250,7 +377,7 @@ function extractNames(document: vscode.TextDocument) {
       ) {
         continue;
       }
-      lineNumbers.push(document.positionAt(match.index).line);
+      const lineNumber = document.positionAt(match.index).line;
       const statements = fromSplit[0]
         .split(/\s*import\s+/)[1]
         .split(/\s*,\s*/)
@@ -261,9 +388,9 @@ function extractNames(document: vscode.TextDocument) {
           const name = asSplit.length > 1 ? asSplit[1] : item;
           const bracketSplit = name.split(/\s*\{\s*/);
           const bracketName = bracketSplit.length > 1 ? bracketSplit[1] : bracketSplit[0];
-          namesSet.add(bracketName.split(/\s*\}\s*/)[0]);
+          lineNumbersName.push({ lineNumber: lineNumber, name: bracketName.split(/\s*\}\s*/)[0] });
         } else {
-          namesSet.add(item);
+          lineNumbersName.push({ lineNumber: lineNumber, name: item });
         }
       });
     }
@@ -274,19 +401,21 @@ function extractNames(document: vscode.TextDocument) {
       if (match[3].trim().startsWith("./") || match[3].trim().startsWith("/")) {
         continue;
       }
-      lineNumbers.push(document.positionAt(match.index).line);
+      const lineNumber = document.positionAt(match.index).line;
       if (match[2].includes(",")) {
         const splitNames = match[2].replace(/\s/g, "").split(",");
-        splitNames.forEach((name) => namesSet.add(name));
+        splitNames.forEach((name) => lineNumbersName.push({ lineNumber: lineNumber, name: name }));
       } else {
-        namesSet.add(match[2].trim());
+        lineNumbersName.push({ lineNumber: lineNumber, name: match[2].trim() });
       }
     }
   }
 
-  let names: string[] = Array.from(namesSet);
+  /*
+  const usageMap = new Map<string, string[]>();
 
   if (names.length > 0) {
+
     const funcPattern = new RegExp(
       `\\b(?:${names.map((name) => `(?:(?:${name})\\.\\w+|${name})`).join("|")})\\(`
     );
@@ -306,20 +435,48 @@ function extractNames(document: vscode.TextDocument) {
       }
     }
   }
+  */
 
-  if (lineNumbers.length === 0) {
+  if (lineNumbersName.length === 0) {
     hasImport = false;
   } else {
     hasImport = true;
   }
 
-  return lineNumbers;
+  return lineNumbersName;
 }
+
+function extractModules(document: vscode.TextDocument, packaged: string) {
+  const text = document.getText();
+  const pattern = new RegExp(packaged.concat("\\.\\w+[\\(\\.]"), "g");
+  const matches: string[] = [];
+  let match;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.length >= 1) {
+      const modules = match[0].split(".")[1].split("(")[0];
+      matches.push(modules);
+    }
+  }
+  return matches;
+}
+
+/*
+function getModules(document: vscode.TextDocument) {
+  let lineNumberNames = extractNames(document);
+  let packageNames : string[] = [];
+  lineNumberNames.map(entry => packageNames.push(entry.name));
+  const usageMap = new Map<string, string[]>();
+
+  packageNames.map((packaged) => usageMap.set(packaged, extractModules(document, packaged)));
+  console.log(usageMap);
+  return usageMap;
+}
+*/
 
 function detectColorTheme() {
   currentColorTheme = vscode.workspace.getConfiguration("workbench").get("colorTheme");
 
-  console.log(currentColorTheme);
 
   if (currentColorTheme?.includes("light") || currentColorTheme?.includes("Light")) {
     currentColorTheme = "light";
@@ -327,7 +484,6 @@ function detectColorTheme() {
     currentColorTheme = "dark";
   }
 
-  console.log(currentColorTheme);
 }
 
 async function createUserMongoDB() {
