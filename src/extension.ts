@@ -30,9 +30,14 @@ const uri =
 interface PackageDictionary {
   lineNumber: number;
   name: string;
+  nickName: string | null;
+  moduleName: string | null;
+  moduleNickName: string | null;
 }
 
 type packageDict = PackageDictionary[];
+
+let lineNumbersName: packageDict = [];
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -62,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
     packages: [],
     tab: "",
     button: "",
-    modules: {}
+    modules: {},
   };
 
   globalState = context.globalState;
@@ -97,8 +102,8 @@ export function activate(context: vscode.ExtensionContext) {
   if (activeEditor) {
     const { document } = activeEditor;
 
-    let lineNumberNames = extractNames(document);
-    lineNumberNames.map((linePair) => (lineNumbers.push(linePair.lineNumber)));
+    extractNames(document);
+    lineNumbersName.map((linePair) => lineNumbers.push(linePair.lineNumber));
 
     // Add decorations to matching lines
     lineDecorations = lineNumbers.map((lineNumber) => ({
@@ -119,8 +124,8 @@ export function activate(context: vscode.ExtensionContext) {
       activeEditor.setDecorations(lightDecoration, []);
       activeEditor.setDecorations(darkDecoration, []);
 
-      let lineNumberNames = extractNames(document);
-      lineNumberNames.map((linePair) => (lineNumbers.push(linePair.lineNumber)));
+      extractNames(document);
+      lineNumbersName.map((linePair) => lineNumbers.push(linePair.lineNumber));
 
       // Add decorations to matching lines
       lineDecorations = lineNumbers.map((lineNumber) => ({
@@ -144,10 +149,9 @@ export function activate(context: vscode.ExtensionContext) {
       editor.setDecorations(lightDecoration, []);
       editor.setDecorations(darkDecoration, []);
 
-      let lineNumberNames = extractNames(document);
+      extractNames(document);
       lineNumbers = [];
-      lineNumberNames.map((linePair) => (lineNumbers.push(linePair.lineNumber)));
-
+      lineNumbersName.map((linePair) => lineNumbers.push(linePair.lineNumber));
 
       // Add decorations to matching lines
       lineDecorations = lineNumbers.map((lineNumber) => ({
@@ -183,23 +187,24 @@ export function activate(context: vscode.ExtensionContext) {
           dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
           console.log("dummy " + dummydata.linetext);
 
-          let lineNumberNames = extractNames(activeEditor.document);
-          let lineArray = lineNumberNames.filter(entry => entry['lineNumber'] === args.lineNumber - 1);
+          extractNames(activeEditor.document);
+          let lineArray = lineNumbersName.filter(
+            (entry) => entry["lineNumber"] === args.lineNumber - 1
+          );
           console.log(lineArray);
-          let packagesList : string[] = [];
-          lineArray.map(packaged => packagesList.push(packaged.name));
-          dummydata.packages = packagesList;
+          let packagesList: string[] = [];
+          lineArray.map((packaged) => packagesList.push(packaged.name));
+          const uniquePackages = packagesList.filter((item, index, array) => array.indexOf(item) === index);
+          dummydata.packages = uniquePackages;
           console.log(dummydata.packages);
         }
       }
       let allModules: { [key: string]: string[] } = {};
       let document = activeEditor.document;
-      dummydata.packages.forEach(packagename => {
+      dummydata.packages.forEach((packagename) => {
         allModules[packagename] = extractModules(document, packagename);
       });
       dummydata.modules = allModules;
-      console.log(dummydata.modules);
-
     }
     if (!activeEditor) {
       if (args) {
@@ -208,14 +213,17 @@ export function activate(context: vscode.ExtensionContext) {
         dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
         console.log("dummy " + dummydata.linetext);
 
-        let lineNumberNames = extractNames(document);
-        let lineArray = lineNumberNames.filter(entry => entry['lineNumber'] === args.lineNumber - 1);
-        let packagesList : string[] = [];
-        lineArray.map(packaged => packagesList.push(packaged.name));
-        dummydata.packages = packagesList;
+        extractNames(document);
+        let lineArray = lineNumbersName.filter(
+          (entry) => entry["lineNumber"] === args.lineNumber - 1
+        );
+        let packagesList: string[] = [];
+        lineArray.map((packaged) => packagesList.push(packaged.name));
+        const uniquePackages = packagesList.filter((item, index, array) => array.indexOf(item) === index);
+        dummydata.packages = uniquePackages;
 
         const allModules: { [key: string]: string[] } = {};
-        dummydata.packages.forEach(packagename => {
+        dummydata.packages.forEach((packagename) => {
           allModules[packagename] = extractModules(document, packagename);
         });
         dummydata.modules = allModules;
@@ -227,53 +235,62 @@ export function activate(context: vscode.ExtensionContext) {
     HelloWorldPanel.render(context.extensionUri, dummydata);
   });
 
-  const openDashboardCommand = vscode.commands.registerCommand("hug-reports.openDashboard", async (args) => {
-    if (activeEditor) {
-      if (args) {
-        if (args.lineNumber) {
-          console.log("Line number: " + args.lineNumber);
-          dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
-          console.log("dummy " + dummydata.linetext);
+  const openDashboardCommand = vscode.commands.registerCommand(
+    "hug-reports.openDashboard",
+    async (args) => {
+      if (activeEditor) {
+        if (args) {
+          if (args.lineNumber) {
+            console.log("Line number: " + args.lineNumber);
+            dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
+            console.log("dummy " + dummydata.linetext);
 
-          let lineNumberNames = extractNames(activeEditor.document);
-          let lineArray = lineNumberNames.filter(entry => entry['lineNumber'] === args.lineNumber - 1);
-          let packagesList : string[] = [];
-          lineArray.map(packaged => packagesList.push(packaged.name));
-          dummydata.packages = packagesList;
+            extractNames(activeEditor.document);
+            let lineArray = lineNumbersName.filter(
+              (entry) => entry["lineNumber"] === args.lineNumber - 1
+            );
+            let packagesList: string[] = [];
+            lineArray.map((packaged) => packagesList.push(packaged.name));
+            const uniquePackages = packagesList.filter((item, index, array) => array.indexOf(item) === index);
+            dummydata.packages = uniquePackages;
+          }
         }
-      }
-      let allModules: { [key: string]: string[] } = {};
-      let document = activeEditor.document;
-      dummydata.packages.forEach(packagename => {
-        allModules[packagename] = extractModules(document, packagename);
-      });
-      dummydata.modules = allModules;
-      console.log(dummydata.modules);
-    }
-    if (!activeEditor) {
-      if (args) {
-        console.log("No active editor");
-        const document = await vscode.workspace.openTextDocument(args.uri);
-        dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
-        console.log("dummy " + dummydata.linetext);
-
-        let lineNumberNames = extractNames(document);
-        let lineArray = lineNumberNames.filter(entry => entry['lineNumber'] === args.lineNumber - 1);
-        let packagesList : string[] = [];
-        lineArray.map(packaged => packagesList.push(packaged.name));
-        dummydata.packages = packagesList;
-
         let allModules: { [key: string]: string[] } = {};
-        dummydata.packages.forEach(packagename => {
+        let document = activeEditor.document;
+        dummydata.packages.forEach((packagename) => {
           allModules[packagename] = extractModules(document, packagename);
         });
         dummydata.modules = allModules;
       }
+      if (!activeEditor) {
+        if (args) {
+          console.log("No active editor");
+          const document = await vscode.workspace.openTextDocument(args.uri);
+          dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
+          console.log("dummy " + dummydata.linetext);
+
+          extractNames(document);
+          
+          let lineArray = lineNumbersName.filter(
+            (entry) => entry["lineNumber"] === args.lineNumber - 1
+          );
+          let packagesList: string[] = [];
+          lineArray.map((packaged) => packagesList.push(packaged.name));
+          const uniquePackages = packagesList.filter((item, index, array) => array.indexOf(item) === index);
+          dummydata.packages = uniquePackages;
+
+          let allModules: { [key: string]: string[] } = {};
+          dummydata.packages.forEach((packagename) => {
+            allModules[packagename] = extractModules(document, packagename);
+          });
+          dummydata.modules = allModules;
+        }
+      }
+      dummydata.tab = "recently thanked";
+      dummydata.button = "dashboard";
+      HelloWorldPanel.render(context.extensionUri, dummydata);
     }
-    dummydata.tab = "recently thanked";
-    dummydata.button = "dashboard";
-    HelloWorldPanel.render(context.extensionUri, dummydata);
-  });
+  );
 
   const sayThanksCommand = vscode.commands.registerCommand(
     "hug-reports.sayThanks",
@@ -282,31 +299,32 @@ export function activate(context: vscode.ExtensionContext) {
       if (activeEditor) {
         activeLine = activeEditor.document.lineAt(args.lineNumber - 1).text;
         dummydata.linetext = activeLine;
-        
 
-        let lineNumberNames = extractNames(activeEditor.document);
-        let lineArray = lineNumberNames.filter(entry => entry['lineNumber'] === args.lineNumber - 1);
-        lineArray.map(packaged => dummydata.packages.push(packaged.name));
-
+        extractNames(activeEditor.document);
         
+        let lineArray = lineNumbersName.filter(
+          (entry) => entry["lineNumber"] === args.lineNumber - 1
+        );
+        lineArray.map((packaged) => dummydata.packages.push(packaged.name));
+
         let allModules: { [key: string]: string[] } = {};
         let document = activeEditor.document;
-        dummydata.packages.forEach(packagename => {
+        dummydata.packages.forEach((packagename) => {
           allModules[packagename] = extractModules(document, packagename);
         });
         dummydata.modules = allModules;
 
-        dummydata.packages.forEach(async packagename => {
+        dummydata.packages.forEach(async (packagename) => {
           const data = {
             lineNumber,
             packagename,
             timestamp: new Date(),
             userId: id,
           };
-  
+
           await saveResponseToMongoDB(data);
         });
-        
+
         const additionalMessage =
           "Your thanks has been sent! If you feel inspired to share more, don't hesitate to send a note to the contributors. Your words of encouragement can make a world of difference and let them know just how much their efforts are valued.";
         const sayMore = "Say More";
@@ -335,33 +353,79 @@ export function deactivate() {
 }
 
 function extractNames(document: vscode.TextDocument) {
-  let lineNumbersName: packageDict = [];
   let match: RegExpExecArray | null;
 
   if (document.languageId === "python") {
     //const pyImportRegex = /^(\s*(?:from\s+[\w\.]+)?\s*import\s+[\w\*\, ]+(?:\s+as\s+[\w]+)?)\b/gm;
     //const pyImportRegex = /^import\s*\S*|^from\s*\S*\s*import\s*\S*/gm;
     //const pyImportRegex = /^(\h*(?:from[^\S\r\n]+([\w]+|\.)[^\S\r\n]+)?import[^\S\r\n]+(([\w]+\b|\*)(?:[^\S\r\n]+as[^\S\r\n]+([\w]+\b|\*))?)+)/gm;
-    const pyImportRegex = /^(\h*(?:from[^\S\r\n]+([\w.]+)[^\S\r\n]+)?import[^\S\r\n]+(([\w]+|\*)(?:[^\S\r\n]+as[^\S\r\n]+([\w]+))?)(?:,[^\S\r\n]+(([\w]+|\*)(?:[^\S\r\n]+as[^\S\r\n]+([\w]+))?))*)/gm;
+    const pyImportRegex =
+      /^(\h*(?:from[^\S\r\n]+([\w.]+)[^\S\r\n]+)?import[^\S\r\n]+(([\w]+|\*)(?:[^\S\r\n]+as[^\S\r\n]+([\w]+))?)(?:,[^\S\r\n]+(([\w]+|\*)(?:[^\S\r\n]+as[^\S\r\n]+([\w]+))?))*)/gm;
     while ((match = pyImportRegex.exec(document.getText()))) {
       const lineNumber = document.positionAt(match.index).line;
 
       const importStatement = match[1].trim();
-      const statements = importStatement
-        .split(/^(?:import|from)\s+/)[1]
-        .split(/\s*,\s*/)
-        .map((item) => item.trim());
+      const statements = importStatement.split(/^(?:import|from)\s+/).map((item) => item.trim());
       statements.forEach((item) => {
-        const namesSplitByAs = item.split(/\s+as\s+/);
-        if (namesSplitByAs.length === 1) {
-          const name = namesSplitByAs[0];
-          if (name.includes("import")) {
-            lineNumbersName.push({ lineNumber: lineNumber, name: name.split(/\s+import\s+/)[1] });
-          } else {
-            lineNumbersName.push({ lineNumber: lineNumber, name: name });
-          }
+        let namesSplitByComma = item.split(/\s*,\s*/);
+        const name = namesSplitByComma[0];
+        if (name.includes("import")) {
+          const packageName = name.split(/\s+import\s+/)[0];
+          namesSplitByComma[0] = name.split(/\s+import\s+/)[1];
+          namesSplitByComma.forEach((items) => {
+            const nameSplitByAs = items.split(/\s+as\s+/);
+            if (nameSplitByAs[0] === "*") {
+              lineNumbersName.push({
+                lineNumber: lineNumber,
+                name: packageName,
+                nickName: null,
+                moduleName: null,
+                moduleNickName: null,
+              });
+            } else {
+              if (nameSplitByAs.length === 1) {
+                lineNumbersName.push({
+                  lineNumber: lineNumber,
+                  name: packageName,
+                  nickName: null,
+                  moduleName: nameSplitByAs[0],
+                  moduleNickName: null,
+                });
+              } else {
+                lineNumbersName.push({
+                  lineNumber: lineNumber,
+                  name: packageName,
+                  nickName: null,
+                  moduleName: nameSplitByAs[0],
+                  moduleNickName: nameSplitByAs[1],
+                });
+              }
+            }
+          });
         } else {
-          lineNumbersName.push({ lineNumber: lineNumber, name: namesSplitByAs[1] });
+          namesSplitByComma.forEach((items) => {
+            const nameSplitByAs = items.split(/\s+as\s+/);
+            if (nameSplitByAs[0] === "") {
+            } else {
+              if (nameSplitByAs.length === 1) {
+                lineNumbersName.push({
+                  lineNumber: lineNumber,
+                  name: nameSplitByAs[0],
+                  nickName: null,
+                  moduleName: null,
+                  moduleNickName: null,
+                });
+              } else {
+                lineNumbersName.push({
+                  lineNumber: lineNumber,
+                  name: nameSplitByAs[0],
+                  nickName: nameSplitByAs[1],
+                  moduleName: null,
+                  moduleNickName: null,
+                });
+              }
+            }
+          });
         }
       });
     }
@@ -388,9 +452,21 @@ function extractNames(document: vscode.TextDocument) {
           const name = asSplit.length > 1 ? asSplit[1] : item;
           const bracketSplit = name.split(/\s*\{\s*/);
           const bracketName = bracketSplit.length > 1 ? bracketSplit[1] : bracketSplit[0];
-          lineNumbersName.push({ lineNumber: lineNumber, name: bracketName.split(/\s*\}\s*/)[0] });
+          lineNumbersName.push({
+            lineNumber: lineNumber,
+            name: bracketName.split(/\s*\}\s*/)[0],
+            nickName: null,
+            moduleName: null,
+            moduleNickName: null,
+          });
         } else {
-          lineNumbersName.push({ lineNumber: lineNumber, name: item });
+          lineNumbersName.push({
+            lineNumber: lineNumber,
+            name: item,
+            nickName: null,
+            moduleName: null,
+            moduleNickName: null,
+          });
         }
       });
     }
@@ -404,9 +480,23 @@ function extractNames(document: vscode.TextDocument) {
       const lineNumber = document.positionAt(match.index).line;
       if (match[2].includes(",")) {
         const splitNames = match[2].replace(/\s/g, "").split(",");
-        splitNames.forEach((name) => lineNumbersName.push({ lineNumber: lineNumber, name: name }));
+        splitNames.forEach((name) =>
+          lineNumbersName.push({
+            lineNumber: lineNumber,
+            name: name,
+            nickName: null,
+            moduleName: null,
+            moduleNickName: null,
+          })
+        );
       } else {
-        lineNumbersName.push({ lineNumber: lineNumber, name: match[2].trim() });
+        lineNumbersName.push({
+          lineNumber: lineNumber,
+          name: match[2].trim(),
+          nickName: null,
+          moduleName: null,
+          moduleNickName: null,
+        });
       }
     }
   }
@@ -442,8 +532,6 @@ function extractNames(document: vscode.TextDocument) {
   } else {
     hasImport = true;
   }
-
-  return lineNumbersName;
 }
 
 function extractModules(document: vscode.TextDocument, packaged: string) {
@@ -458,7 +546,39 @@ function extractModules(document: vscode.TextDocument, packaged: string) {
       matches.push(modules);
     }
   }
-  return matches;
+
+  const parsedPackages = lineNumbersName.filter((obj) => obj.name === packaged);
+  parsedPackages.forEach((element) => {
+    if (element.nickName !== null) {
+      const nickPattern = new RegExp(element.nickName.concat("\\.\\w+[\\(\\.]"), "g");
+      while ((match = nickPattern.exec(text)) !== null) {
+        if (match.length >= 1) {
+          const modules = match[0].split(".")[1].split("(")[0];
+          matches.push(modules);
+        }
+      }
+    }
+
+    if (element.moduleName !== null) {
+      let modPattern;
+      if (element.moduleNickName !== null) {
+        modPattern = new RegExp(element.moduleNickName.concat("\\("), "g");
+      } else {
+        modPattern = new RegExp(element.moduleName.concat("\\("), "g");
+      }
+
+      while ((match = modPattern.exec(text)) !== null) {
+        if (match.length >= 1) {
+          matches.push(element.moduleName);
+          break;
+        }
+      }
+    }
+  });
+
+  const uniqueMatches = matches.filter((item, index, array) => array.indexOf(item) === index);
+
+  return uniqueMatches;
 }
 
 /*
@@ -477,13 +597,11 @@ function getModules(document: vscode.TextDocument) {
 function detectColorTheme() {
   currentColorTheme = vscode.workspace.getConfiguration("workbench").get("colorTheme");
 
-
   if (currentColorTheme?.includes("light") || currentColorTheme?.includes("Light")) {
     currentColorTheme = "light";
   } else {
     currentColorTheme = "dark";
   }
-
 }
 
 async function createUserMongoDB() {

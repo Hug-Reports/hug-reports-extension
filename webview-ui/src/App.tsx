@@ -1,5 +1,5 @@
 import { vscode } from "./utilities/vscode";
-import { useState, useRef } from 'react';
+import { useState, useRef } from "react";
 import "./App.css";
 import {
   Button,
@@ -14,22 +14,16 @@ import {
   TableHeader,
   TableHeaderCell,
   TableCellLayout,
-  Image,
-  Field,
-  Radio,
-  RadioGroup,
+  shorthands,
   SelectTabData,
   SelectTabEvent,
   Combobox,
   Option,
   makeStyles,
-  useId,
-  tokens
-} from '@fluentui/react-components';
-import type { ComboboxProps } from '@fluentui/react-components';
+  tokens,
+} from "@fluentui/react-components";
+import type { ComboboxProps } from "@fluentui/react-components";
 import { Dismiss12Regular } from "@fluentui/react-icons";
-
-
 
 declare global {
   interface Window {
@@ -38,8 +32,10 @@ declare global {
     image: any;
   }
 }
-function App() {
 
+function SayMoreForm() {}
+
+function App() {
   const lineofcode = window.lineofcode;
   const [thankPackages, setPackage] = useState(lineofcode.packages);
   // const contributors = window.contributors;
@@ -52,13 +48,29 @@ function App() {
   // let packageModules: string[] = [].concat(...Object.values(modulesDict));
 
   const useStyles = makeStyles({
+    root: {
+      marginTop: tokens.spacingVerticalS,
+      marginBottom: tokens.spacingVerticalS,
+      marginLeft: tokens.spacingHorizontalS,
+      marginRight: tokens.spacingHorizontalS,
+    },
+    textbox: {
+      width: "100%",
+      marginBottom: tokens.spacingVerticalS,
+    },
+    moduleSelectBox: {
+      display: "grid",
+      gridTemplateRows: "repeat(1fr)",
+      justifyItems: "start",
+      ...shorthands.gap("2px"),
+      maxWidth: "400px",
+    },
     wrapper: {
       alignItems: "center",
       columnGap: "15px",
       display: "flex",
     },
-    topPackage: {
-    },
+    topPackage: {},
     tagsList: {
       listStyleType: "none",
       marginBottom: tokens.spacingVerticalXXS,
@@ -71,18 +83,12 @@ function App() {
 
   const styles = useStyles();
 
-  const contributors = [
-    "usera",
-    "userb",
-    "userc",
-    "userd",
-    "usere"
-  ];
+  const contributors = ["usera", "userb", "userc", "userd", "usere"];
 
   const thankedColumns = [
     { columnKey: "package", label: "Package" },
     { columnKey: "date", label: "Date Thanked" },
-    { columnKey: "contributors", label: "Contributor" }
+    { columnKey: "contributors", label: "Contributor" },
   ];
 
   const items = [
@@ -90,107 +96,83 @@ function App() {
       package: "numpy",
       dateThanked: "Yesterday",
       contributors: {
-        usernames: [
-          "a",
-          "b",
-          "c",
-          "d"
-        ]
-      }
+        usernames: ["a", "b", "c", "d"],
+      },
     },
     {
       package: "matplotlib",
       dateThanked: "April 4th, 2024",
       contributors: {
-        usernames: [
-          "e",
-          "f",
-          "g",
-          "h"
-        ]
-      }
+        usernames: ["e", "f", "g", "h"],
+      },
     },
     {
       package: "pandas",
       dateThanked: "March 30th, 2024",
       contributors: {
-        usernames: [
-          "i",
-          "j",
-          "k",
-          "l"
-        ]
-      }
-    }
+        usernames: ["i", "j", "k", "l"],
+      },
+    },
   ];
 
   const topThankedColumns = [
     { columnKey: "contributor", label: "Contributor" },
     { columnKey: "frequency", label: "Count" },
-    { columnKey: "package", label: "Packages" }
+    { columnKey: "package", label: "Packages" },
   ];
 
   const topThanked = [
     {
       contributor: "a",
       frequency: 100,
-      package: ["something", "other thing"]
+      package: ["something", "other thing"],
     },
     {
       contributor: "b",
       frequency: 10,
-      package: ["something", "another thing"]
+      package: ["something", "another thing"],
     },
     {
       contributor: "c",
       frequency: 5,
-      package: ["something"]
+      package: ["something"],
     },
     {
       contributor: "d",
       frequency: 1,
-      package: ["something"]
+      package: ["something"],
     },
     {
       contributor: "e",
       frequency: 1,
-      package: ["something"]
-    }
+      package: ["something"],
+    },
   ];
 
   const topPackages = [
     {
       package: "test1",
-      frequency: 200
+      frequency: 200,
     },
     {
       package: "test2",
-      frequency: 100
+      frequency: 100,
     },
     {
       package: "test3",
-      frequency: 100
-    }
+      frequency: 100,
+    },
   ];
 
   const onSayMoreTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
-    if (data.value === 'form') {
-      setTab('form');
-      setPage('form');
+    if (data.value === "form") {
+      setTab("form");
+      setPage("form");
+    } else {
+      setTab("recently thanked");
+      setPage("dashboard");
     }
-    else {
-      setTab('recently thanked');
-      setPage('dashboard');
-    }
-  }
-
-  const onThankOther = (newPackage) => {
-    setPackage(newPackage);
-    // setModules(modulesDict.get(thankPackages));
-    setButton('form');
-    setTab('form');
-    setPage('form');
-  }
+  };
 
   // Select module functionality
 
@@ -220,189 +202,159 @@ function App() {
     setComboValue(event.target.value);
   };
 
-
   // Select package functionality
-  const comboPackageId = useId("combo-multi-package");
-  const selectedPackageListId = `${comboPackageId}-selection`;
 
   const selectedPackageListRef = useRef<HTMLUListElement>(null);
-  const comboboxPackageInputRef = useRef<HTMLInputElement>(null);
 
-  const [selectedPackageOptions, setSelectedPackageOptions] = useState<string[]>([]);
+  const [selectedPackageOptions, setSelectedPackageOptions] = useState<string[]>(thankPackages);
 
+  /*
   const onSelectPackageSelect: ComboboxProps["onOptionSelect"] = (event, data) => {
     setSelectedPackageOptions(data.selectedOptions);
     let packagingModules = [];
     data.selectedOptions.forEach(s => packagingModules = packagingModules.concat(modulesDict[s]));
     setModules(packageModules);
   };
+  */
 
   const onTagClick = (option: string, index: number) => {
     // remove selected option
-    setSelectedPackageOptions(selectedPackageOptions.filter((o) => o !== option));
+    if (selectedPackageOptions.length > 1) {
+      setSelectedPackageOptions(selectedPackageOptions.filter((o) => o !== option));
 
-    // focus previous or next option, defaulting to focusing back to the combo input
-    const indexToFocus = index === 0 ? 1 : index - 1;
-    const optionToFocus = selectedPackageListRef.current?.querySelector(
-      `#${comboPackageId}-remove-${indexToFocus}`
-    );
-    if (optionToFocus) {
-      (optionToFocus as HTMLButtonElement).focus();
-    } else {
-      comboboxPackageInputRef.current?.focus();
+      
+
+      // focus previous or next option, defaulting to focusing back to the combo input
+      const indexToFocus = index === 0 ? 1 : index - 1;
+      const optionToFocus = selectedPackageListRef.current?.querySelector(
+        `#packageTags-remove-${indexToFocus}`
+      );
+      if (optionToFocus) {
+        (optionToFocus as HTMLButtonElement).focus();
+      }
     }
+
+    const filteredModules = Object.keys(modulesDict).filter(key => selectedPackageOptions.includes(key)).map(key => modulesDict[key]);
+
+    setModules([].concat(...filteredModules));
   };
 
-  const labelledBy =
-    selectedOptions.length > 0 ? `${comboPackageId} ${selectedPackageListId}` : comboPackageId;
+  
+  const onThankOther = (newPackage) => {
+    setPackage(newPackage);
+    setSelectedPackageOptions([newPackage]);
+    // setModules(modulesDict.get(thankPackages));
+    setButton("form");
+    setTab("form");
+    setPage("form");
+  };
 
 
   return (
-    <main>
-      {
-        button === 'form'
-          ?
-          <div className="navigation">
-            <TabList selectedValue={page} onTabSelect={onSayMoreTabSelect}>
-              <Tab value="form">Say More</Tab>
-              <Tab value="dashboard">Dashboard</Tab>
-            </TabList>
+    <main className={styles.root}>
+      {button === "form" ? (
+        <div className="navigation">
+          <TabList selectedValue={page} onTabSelect={onSayMoreTabSelect}>
+            <Tab value="form">Say More</Tab>
+            <Tab value="dashboard">Dashboard</Tab>
+          </TabList>
+        </div>
+      ) : (
+        <div className="empty"></div>
+      )}
+
+      {tab === "form" ? (
+        <div className="sayMoreForm">
+          <h2>Say Thanks</h2>
+          <p>
+            Send a personal note to the contributors and let them know how their code has helped
+            you!
+          </p>
+
+          <div>
+            <label id="packageTags">You are thanking the following package(s):</label>
+            {selectedPackageOptions.length ? (
+              <ul className={styles.tagsList}>
+                {selectedPackageOptions.map((option, i) => (
+                  <li key={option}>
+                    <Button
+                      size="small"
+                      shape="circular"
+                      appearance="primary"
+                      icon={<Dismiss12Regular />}
+                      iconPosition="after"
+                      onClick={() => onTagClick(option, i)}
+                      id={`packageTags-remove-${i}`}
+                      aria-labelledby={`packageTags-remove packageTags-remove-${i}`}>
+                      {option}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
-          :
-          <div className="empty"></div>
-      }
 
-      {
-        tab === 'form'
-          ?
-          <div className="sayMoreForm">
-            <h2>Say Thanks</h2>
-            <p>Send a personal note to the contributors and let them know how their code has helped you!</p>
-
-            <div>
-              <label id={comboPackageId}>You are thanking the following package(s):</label>
-              {selectedPackageOptions.length ? (
-                <ul
-                  id={selectedPackageListId}
-                  className={styles.tagsList}
-                  ref={selectedPackageListRef}
-                >
-                  {/* The "Remove" span is used for naming the buttons without affecting the Combobox name */}
-                  <span id={`${comboPackageId}-remove`} hidden>
-                    Remove
-                  </span>
-                  {selectedPackageOptions.map((option, i) => (
-                    <li key={option}>
-                      <Button
-                        size="small"
-                        shape="circular"
-                        appearance="primary"
-                        icon={<Dismiss12Regular />}
-                        iconPosition="after"
-                        onClick={() => onTagClick(option, i)}
-                        id={`${comboPackageId}-remove-${i}`}
-                        aria-labelledby={`${comboPackageId}-remove ${comboPackageId}-remove-${i}`}
-                      >
-                        {option}
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
+          {packageModules.length >= 1 ? (
+            <div className={styles.moduleSelectBox}>
+              <br></br>
+              <label id="comboModules">Thank Modules:</label>
               <Combobox
-                aria-labelledby={labelledBy}
+                aria-labelledby="comboModules"
                 multiselect={true}
-                placeholder="Select one or more packages"
-                selectedOptions={selectedPackageOptions}
-                onOptionSelect={onSelectPackageSelect}
-                ref={comboboxPackageInputRef}
-              >
-                {thankPackages.map((option) => (
-                  <Option key={option}>{option}</Option>
+                placeholder="Select the modules you would like to thank"
+                value={comboxValue}
+                onBlur={onBlurModuleSelect}
+                onChange={onChangeModuleSelect}
+                onFocus={onFocusModuleSelect}
+                onOptionSelect={onSelectModuleSelect}>
+                {packageModules.map((amodule) => (
+                  <Option key={amodule}>{amodule}</Option>
                 ))}
               </Combobox>
             </div>
+          ): null}
 
-            {
-              packageModules.length >= 1 &&
-              <div className="selectModules">
-                <br></br>
-                <label id="comboModules">Thank Modules</label>
-                <Combobox
-                  aria-labelledby="comboModules"
-                  multiselect={true}
-                  placeholder="Choose which modules you would like to thank"
-                  value={comboxValue}
-                  onBlur={onBlurModuleSelect}
-                  onChange={onChangeModuleSelect}
-                  onFocus={onFocusModuleSelect}
-                  onOptionSelect={onSelectModuleSelect}
-                >
-                  {packageModules.map((amodule) => (
-                    <Option key={amodule}>{amodule}</Option>
-                  ))}
-                </Combobox>
-              </div>
-            }
+          <p>Your thanks goes to:</p>
+          <p>{contributors.join(", ")}</p>
 
+          <form>
+            <div className="useCase">
+              <Label htmlFor="useCase">Describe your specific use case for this package:</Label>
+              <br></br>
+              <Textarea rows={3} id="useCase" name="useCase" className={styles.textbox}></Textarea>
+            </div>
 
-            <p>Your thanks goes to:</p>
-            <p>{contributors.join(", ")}</p>
+            <div className="helpfulReason">
+              <Label htmlFor="helpfulReason">Why was this package useful?</Label>
+              <br></br>
+              <Textarea
+                rows={3}
+                id="helpfulReason"
+                name="helpfulReason"
+                className={styles.textbox}></Textarea>
+            </div>
 
-            <form>
-              <div className="useCase">
-                <Label htmlFor="useCase">Describe your specific use case for this package:</Label>
-                <br></br>
-                <Textarea rows={3} id="useCase" name="useCase"></Textarea>
-              </div>
+            <div className="personalNote">
+              <Label htmlFor="personalNote">Add a personal note here:</Label>
+              <br></br>
+              <Textarea
+                rows={3}
+                id="personalNote"
+                name="personalNote"
+                className={styles.textbox}></Textarea>
+            </div>
 
-              <div className="helpfulReason">
-                <Label htmlFor="helpfulReason">Why was this package useful?</Label>
-                <br></br>
-                <Textarea rows={3} id="helpfulReason" name="helpfulReason"></Textarea>
-              </div>
+            <Button appearance="primary">Submit</Button>
+          </form>
+        </div>
+      ) : (
+        <TabList selectedValue={tab} onTabSelect={(event, data) => setTab(data.value)}>
+          <Tab value="recently thanked">Recently Thanked</Tab>
+          <Tab value="usage">Usage</Tab>
+        </TabList>
+      )}
 
-              <div className="personalNote">
-                <Label htmlFor="personalNote">Add a personal note here:</Label>
-                <br></br>
-                <Textarea rows={3} id="personalNote" name="personalNote"></Textarea>
-              </div>
-
-              <div className="rating-0-10">
-                <p className="grateful-scale">How surprised do you think the recipient(s) will be to learn about the specific reasons for why you feel grateful to them?
-                  (0 = not surprised at all and 10 = extremely surprised) </p>
-                <div className="chart-scale">
-                  <Field label="">
-                    <RadioGroup layout="horizontal-stacked">
-                      <Radio value="1" label="1" />
-                      <Radio value="2" label="2" />
-                      <Radio value="3" label="3" />
-                      <Radio value="4" label="4" />
-                      <Radio value="5" label="5" />
-                      <Radio value="6" label="6" />
-                      <Radio value="7" label="7" />
-                      <Radio value="8" label="8" />
-                      <Radio value="9" label="9" />
-                      <Radio value="10" label="10" />
-                    </RadioGroup>
-                  </Field>
-
-                </div>
-              </div>
-
-              <Button appearance="primary">Submit</Button>
-            </form>
-          </div>
-          :
-          <TabList selectedValue={tab} onTabSelect={(event, data) => setTab(data.value)}>
-            <Tab value="recently thanked">Recently Thanked</Tab>
-            <Tab value="usage">Usage</Tab>
-          </TabList>
-      }
-
-      {
-        tab === 'recently thanked' &&
-
+      {tab === "recently thanked" && (
         <div className="recentlyThanked">
           <h2>Recently Thanked</h2>
 
@@ -412,9 +364,7 @@ function App() {
             <TableHeader>
               <TableRow>
                 {thankedColumns.map((column) => (
-                  <TableHeaderCell key={column.columnKey}>
-                    {column.label}
-                  </TableHeaderCell>
+                  <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>
                 ))}
               </TableRow>
             </TableHeader>
@@ -434,11 +384,9 @@ function App() {
             </TableBody>
           </Table>
         </div>
+      )}
 
-      }
-
-      {
-        tab === 'usage' &&
+      {tab === "usage" && (
         <div className="usage">
           <h2>Usage</h2>
 
@@ -449,9 +397,7 @@ function App() {
             <TableHeader>
               <TableRow>
                 {topThankedColumns.map((column) => (
-                  <TableHeaderCell key={column.columnKey}>
-                    {column.label}
-                  </TableHeaderCell>
+                  <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>
                 ))}
               </TableRow>
             </TableHeader>
@@ -475,9 +421,8 @@ function App() {
               </div>
             ))}
           </div>
-
         </div>
-      }
+      )}
     </main>
   );
 }
