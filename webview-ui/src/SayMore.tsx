@@ -14,7 +14,7 @@ import {
 import type { ComboboxProps } from "@fluentui/react-components";
 import { Dismiss12Regular } from "@fluentui/react-icons";
 
-export function SayMoreNav({ page, setPage, tab, setTab }) {
+export function SayMoreNav({ page, setPage, setTab }) {
   const onSayMoreTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
     if (data.value === "form") {
       setTab("form");
@@ -43,11 +43,14 @@ export function SayMoreSelectPackage({
   setModule,
 }) {
   const selectedPackageListRef = useRef<HTMLUListElement>(null);
+  // const [test, setTest] = useState("");
 
   const onTagClick = (option: string, index: number) => {
+    let newSelectedPackages = selectedPackageOptions;
     // remove selected option
     if (selectedPackageOptions.length > 1) {
-      setSelectedPackageOptions(selectedPackageOptions.filter((o) => o !== option));
+      newSelectedPackages = selectedPackageOptions.filter((o) => o !== option);
+      setSelectedPackageOptions(newSelectedPackages);
 
       // focus previous or next option, defaulting to focusing back to the combo input
       const indexToFocus = index === 0 ? 1 : index - 1;
@@ -60,10 +63,11 @@ export function SayMoreSelectPackage({
     }
 
     const filteredModules = Object.keys(modulesDict)
-      .filter((key) => selectedPackageOptions.includes(key))
+      .filter((key) => newSelectedPackages.includes(key))
       .map((key) => modulesDict[key]);
 
-    setModule([].concat(...filteredModules));
+    const newModules = [].concat(...filteredModules);
+    setModule(newModules);
   };
 
   let labelString: string;

@@ -70,7 +70,7 @@ function App() {
   return (
     <main className={styles.root}>
       {button === "form" ? (
-        <SayMoreNav page={page} setPage={setPage} tab={tab} setTab={setTab} />
+        <SayMoreNav page={page} setPage={setPage} setTab={setTab} />
       ) : null}
 
       {tab === "form" ? (
@@ -102,6 +102,8 @@ function App() {
           setButton={setButton}
           setTab={setTab}
           setPage={setPage}
+          setModule={setModule}
+          modulesDict={modulesDict}
         />
       )}
 

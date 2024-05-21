@@ -29,6 +29,8 @@ export function RecentlyThanked({
   setButton,
   setTab,
   setPage,
+  setModule,
+  modulesDict
 }) {
   const thankedColumns = [
     { columnKey: "package", label: "Package" },
@@ -60,10 +62,12 @@ export function RecentlyThanked({
     },
   ];
 
+
   const onThankOther = (newPackage) => {
     setPackage(newPackage);
     setSelectedPackageOptions([newPackage]);
-    // setModule(modulesDict.get(thankPackages));
+    const newModules = [].concat(...Object.entries(modulesDict).filter(([key, value]) => key === newPackage).map(([key, value]) => value));
+    setModule(newModules);
     setButton("form");
     setTab("form");
     setPage("form");
