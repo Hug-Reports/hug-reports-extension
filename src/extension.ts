@@ -501,32 +501,6 @@ function extractNames(document: vscode.TextDocument) {
     }
   }
 
-  /*
-  const usageMap = new Map<string, string[]>();
-
-  if (names.length > 0) {
-
-    const funcPattern = new RegExp(
-      `\\b(?:${names.map((name) => `(?:(?:${name})\\.\\w+|${name})`).join("|")})\\(`
-    );
-
-    for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
-      const line = document.lineAt(lineNumber).text;
-      const isMatching = funcPattern.test(line);
-      if (isMatching) {
-        lineNumbers.push(lineNumber);
-      } else {
-        const attrPattern = new RegExp(
-          `\\b(?:${names.map((name) => `(?:(?:${name})\\.\\w+)`).join("|")})`
-        );
-        if (attrPattern.test(line)) {
-          lineNumbers.push(lineNumber);
-        }
-      }
-    }
-  }
-  */
-
   if (lineNumbersName.length === 0) {
     hasImport = false;
   } else {
@@ -580,19 +554,6 @@ function extractModules(document: vscode.TextDocument, packaged: string) {
 
   return uniqueMatches;
 }
-
-/*
-function getModules(document: vscode.TextDocument) {
-  let lineNumberNames = extractNames(document);
-  let packageNames : string[] = [];
-  lineNumberNames.map(entry => packageNames.push(entry.name));
-  const usageMap = new Map<string, string[]>();
-
-  packageNames.map((packaged) => usageMap.set(packaged, extractModules(document, packaged)));
-  console.log(usageMap);
-  return usageMap;
-}
-*/
 
 function detectColorTheme() {
   currentColorTheme = vscode.workspace.getConfiguration("workbench").get("colorTheme");
