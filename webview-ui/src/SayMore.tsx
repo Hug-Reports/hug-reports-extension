@@ -62,19 +62,25 @@ export function SayMoreSelectPackage({
       }
     }
 
-    const filteredModules = Object.keys(modulesDict)
-      .filter((key) => newSelectedPackages.includes(key))
-      .map((key) => modulesDict[key]);
+    const filteredModules = modulesDict.filter((entry) =>
+      newSelectedPackages.includes(entry.packageName)
+    );
 
-    const newModules = [].concat(...filteredModules);
+    const newModules = filteredModules.reduce((acc, pkg) => {
+      return acc.concat(pkg.modules.map((moduleType) => moduleType.identifier));
+    }, []);
+
     setModule(newModules);
   };
 
   let labelString: string;
+  let tagSymbol: boolean;
   if (selectedPackageOptions.length > 1) {
     labelString = "Please select a package to thank: ";
+    tagSymbol = true;
   } else {
     labelString = "You are thanking the following package: ";
+    tagSymbol = false;
   }
 
   return (
@@ -93,7 +99,7 @@ export function SayMoreSelectPackage({
                 size="small"
                 shape="circular"
                 appearance="primary"
-                icon={<Dismiss12Regular />}
+                icon={tagSymbol ? <Dismiss12Regular /> : null}
                 iconPosition="after"
                 onClick={() => onTagClick(option, i)}
                 id={`packageTags-remove-${i}`}
@@ -109,7 +115,7 @@ export function SayMoreSelectPackage({
 }
 
 export function SayMoreSelectModules({ styles, packageModules }) {
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState([]);
   const [comboxValue, setComboValue] = useState("");
 
   const onSelectModuleSelect: ComboboxProps["onOptionSelect"] = (event, data) => {

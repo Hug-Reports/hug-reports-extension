@@ -21,13 +21,15 @@ declare global {
 
 function App() {
   const lineofcode = window.lineofcode;
-  const [thankPackages, setPackage] = useState(lineofcode.packages);
+  const modulesDict = lineofcode.modules;
+  const [thankPackages, setPackage] = useState(modulesDict.map(item => item.packageName));
   // const contributors = window.contributors;
   const [button, setButton] = useState(lineofcode.button);
   const [tab, setTab] = useState(lineofcode.tab);
   const [page, setPage] = useState(button);
-  const modulesDict = lineofcode.modules;
-  const [packageModules, setModule] = useState([].concat(...Object.values(modulesDict)));
+  const [packageModules, setModule] = useState(modulesDict.reduce((acc, pkg) => {
+    return acc.concat(pkg.modules.map(moduleType => moduleType.identifier));
+  }, []));
 
   const useStyles = makeStyles({
     root: {
@@ -86,7 +88,6 @@ function App() {
           {selectedPackageOptions.length > 1 ? null : (
             <div className="fillForm">
               <SayMoreSelectModules styles={styles} packageModules={packageModules} />
-              <SayMoreContributors />
               <SayMoreForm styles={styles} />
             </div>
           )}
