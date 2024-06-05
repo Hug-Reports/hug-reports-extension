@@ -81,11 +81,13 @@ export function createPythonPackageObject(
           aliases.push(lineArray[idx]);
           identifier = lineArray[idx];
           idx += 1;
+        } else {
+          aliases.push(lineArray[idx - 1]);
         }
-        modules.push({
-          searchModules: searchModules,
-          identifier: identifier,
-        });
+        // modules.push({
+        //   searchModules: searchModules,
+        //   identifier: identifier,
+        // });
       }
     }
     packageDictEntry.push({
@@ -178,12 +180,17 @@ export function extractNames(document: vscode.TextDocument) {
   return packageDictionary;
 }
 
-export function extractModules(document: vscode.TextDocument, alias: string, modulesList: ModuleType[], aliasList: string[]) {
+export function extractModules(
+  document: vscode.TextDocument,
+  alias: string,
+  modulesList: ModuleType[],
+  aliasList: string[]
+) {
   const text = document.getText();
   //const regexString: string = "\\b" + alias + "(?:\\.\\w)*\\(";
   //console.log(regexString);
   //const pattern: RegExp = new RegExp(regexString);
-  const pattern = new RegExp(alias.concat("(\\.\\w+)*[\\(]"), "g");
+  const pattern = new RegExp(alias.concat("(\\.[A-Za-z0-9_]+)*[\\(]"), "g");
   const matches: ModuleType[] = [];
   let match;
 
@@ -198,7 +205,7 @@ export function extractModules(document: vscode.TextDocument, alias: string, mod
       } else {
         searchModule = match[0].split(".")[splitReferenceModules.length - 1].replace("(", "");
       }
-      console.log(searchModule);
+      console.log("Module:" + searchModule);
       matches.push({
         searchModules: searchModule,
         identifier: identifier,
