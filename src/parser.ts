@@ -190,18 +190,18 @@ export function extractModules(
   //const regexString: string = "\\b" + alias + "(?:\\.\\w)*\\(";
   //console.log(regexString);
   //const pattern: RegExp = new RegExp(regexString);
-  const pattern = new RegExp(alias.concat("(\\.[A-Za-z0-9_]+)*[\\(]"), "g");
+  const pattern = new RegExp(`(?<=[^A-Za-z0-9_])${alias.concat("(\\.[A-Za-z0-9_]+)*[\\(]")}`, "g");
   const matches: ModuleType[] = [];
   let match;
 
   while ((match = pattern.exec(text)) !== null) {
     if (match.length >= 1) {
+      console.log("Match:" + match[0]);
       const identifier = match[0].split("(")[0].trim();
       const splitReferenceModules = match[0].split(".");
       let searchModule;
       if (splitReferenceModules.length === 1) {
-        const index = aliasList.indexOf(identifier);
-        searchModule = modulesList[index].searchModules;
+        searchModule = identifier;
       } else {
         searchModule = match[0].split(".")[splitReferenceModules.length - 1].replace("(", "");
       }

@@ -76,27 +76,37 @@ function getPackages(document: vscode.TextDocument, lineNumber: number) {
 */
 
 function getModules(document: vscode.TextDocument, lineNumber: number) {
+  console.log("line number: " + lineNumber);
   const linePackages = lineNumbersName[lineNumber];
-  linePackages.forEach((packageType) => {
-    const packageAliases = packageType.aliases;
-    let allModuleInstances: ModuleType[] = [];
-    packageAliases.forEach((alias) => {
-      allModuleInstances = allModuleInstances.concat(extractModules(document, alias, packageType.modules, packageAliases));
-      //console.log(allModuleInstances);
-    });
-    packageType.modules = packageType.modules.concat(allModuleInstances);
-    const isUniqueModule = (module: ModuleType, index: number, self: ModuleType[]) => {
-      return (
-        self.findIndex(
-          (m) => m.identifier === module.identifier && m.searchModules === module.searchModules
-        ) === index
-      );
-    };
-  
-    packageType.modules = packageType.modules.filter(isUniqueModule);
-  });
   console.log(linePackages);
-  return linePackages;
+  try {
+    linePackages.forEach((packageType) => {
+      const packageAliases = packageType.aliases;
+      let allModuleInstances: ModuleType[] = [];
+      packageAliases.forEach((alias) => {
+        allModuleInstances = allModuleInstances.concat(
+          extractModules(document, alias, packageType.modules, packageAliases)
+        );
+        //console.log(allModuleInstances);
+      });
+      packageType.modules = packageType.modules.concat(allModuleInstances);
+      const isUniqueModule = (module: ModuleType, index: number, self: ModuleType[]) => {
+        return (
+          self.findIndex(
+            (m) => m.identifier === module.identifier && m.searchModules === module.searchModules
+          ) === index
+        );
+      };
+
+      packageType.modules = packageType.modules.filter(isUniqueModule);
+    });
+    console.log("got here");
+    console.log(linePackages);
+    return linePackages;
+  } catch (error) {
+    console.error("Error getting modules: ", error);
+    return linePackages;
+  }
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -222,7 +232,7 @@ export function activate(context: vscode.ExtensionContext) {
           console.log("dummy " + dummydata.linetext);
         }
       }
-      
+
       let document = activeEditor.document;
       updateImports(document);
       dummydata.modules = getModules(document, args.lineNumber - 1);
@@ -239,7 +249,8 @@ export function activate(context: vscode.ExtensionContext) {
     }
     dummydata.tab = "form";
     dummydata.button = "form";
-
+    console.log("dummy data");
+    console.log(dummydata);
     HelloWorldPanel.render(context.extensionUri, dummydata);
   });
 
@@ -263,13 +274,14 @@ export function activate(context: vscode.ExtensionContext) {
           console.log("No active editor");
           const document = await vscode.workspace.openTextDocument(args.uri);
           dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
-          console.log("dummy " + dummydata.linetext);
           updateImports(document);
           dummydata.modules = getModules(document, args.lineNumber - 1);
         }
       }
       dummydata.tab = "recently thanked";
       dummydata.button = "dashboard";
+      console.log("dummy data");
+      console.log(dummydata);
       HelloWorldPanel.render(context.extensionUri, dummydata);
     }
   );
@@ -281,7 +293,6 @@ export function activate(context: vscode.ExtensionContext) {
       if (activeEditor) {
         activeLine = activeEditor.document.lineAt(args.lineNumber - 1).text;
         dummydata.linetext = activeLine;
-
 
         let document = activeEditor.document;
         updateImports(document);
