@@ -87,7 +87,7 @@ function App() {
 
           {selectedPackageOptions.length > 1 ? null : (
             <div className="fillForm">
-              <SayMoreSelectModules styles={styles} packageModules={packageModules} />
+              <SayMoreSelectModules styles={styles} packageModules={packageModules} setModule={setModule} />
               <SayMoreForm styles={styles} />
             </div>
           )}
