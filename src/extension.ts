@@ -46,6 +46,7 @@ interface additionalData {
   tab: string;
   button: string;
   modules: PackageType[];
+  theme: string; // light or dark
 }
 
 type AddData = additionalData;
@@ -117,6 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
     tab: "",
     button: "",
     modules: [],
+    theme: "light",
   };
 
   globalState = context.globalState;
@@ -249,6 +251,9 @@ export function activate(context: vscode.ExtensionContext) {
     }
     dummydata.tab = "form";
     dummydata.button = "form";
+    if (currentColorTheme) {
+      dummydata.theme = currentColorTheme;
+    }
     console.log("dummy data");
     console.log(dummydata);
     HelloWorldPanel.render(context.extensionUri, dummydata);
