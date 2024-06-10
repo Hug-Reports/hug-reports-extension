@@ -114,7 +114,7 @@ export function SayMoreSelectPackage({
   );
 }
 
-export function SayMoreSelectModules({ styles, packageModules }) {
+export function SayMoreSelectModules({ styles, packageModules, setModule }) {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [comboxValue, setComboValue] = useState("");
 
@@ -140,6 +140,15 @@ export function SayMoreSelectModules({ styles, packageModules }) {
   const onChangeModuleSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     setComboValue(event.target.value);
   };
+
+  const selectAllOption = () => {
+    if (!(packageModules.includes("Select entire package")) && (packageModules.length >= 1)) {
+      const newModules = ["Select entire package"].concat(packageModules);
+      setModule(newModules);
+    } 
+  }
+
+  selectAllOption();
 
   return (
     <div className="selectedModules">
