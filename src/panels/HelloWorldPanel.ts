@@ -3,23 +3,23 @@ import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
 
 /**
- * This class manages the state and behavior of HelloWorld webview panels.
+ * This class manages the state and behavior of HugReports webview panels.
  *
  * It contains all the data and methods for:
  *
- * - Creating and rendering HelloWorld webview panels
+ * - Creating and rendering HugReports webview panels
  * - Properly cleaning up and disposing of webview resources when the panel is closed
  * - Setting the HTML (and by proxy CSS/JavaScript) content of the webview panel
  * - Setting message listeners so data can be passed between the webview and extension
  */
-export class HelloWorldPanel {
-  public static currentPanel: HelloWorldPanel | undefined;
+export class HugReportsPanel {
+  public static currentPanel: HugReportsPanel | undefined;
   private readonly _panel: WebviewPanel;
   private readonly _lineofcode: any;
   private _disposables: Disposable[] = [];
 
   /**
-   * The HelloWorldPanel class private constructor (called only from the render method).
+   * The HugReportsPanel class private constructor (called only from the render method).
    *
    * @param panel A reference to the webview panel
    * @param extensionUri The URI of the directory containing the extension
@@ -46,18 +46,18 @@ export class HelloWorldPanel {
    * @param extensionUri The URI of the directory containing the extension.
    */
   public static render(extensionUri: Uri, lineofcode: any) {
-    if (HelloWorldPanel.currentPanel) {
+    if (HugReportsPanel.currentPanel) {
       // If the webview panel already exists dispose it
 
       // Dispose of the current webview panel
-      HelloWorldPanel.currentPanel.dispose();
+      HugReportsPanel.currentPanel.dispose();
     }
     // If a webview panel does not already exist create and show a new one
     const panel = window.createWebviewPanel(
       // Panel view type
-      "showHelloWorld",
+      "showHugReports",
       // Panel title
-      "Hello World",
+      "Hug Reports",
       // The editor column the panel should be displayed in
       ViewColumn.Beside,
       // Extra panel configurations
@@ -73,14 +73,14 @@ export class HelloWorldPanel {
       }
     );
 
-    HelloWorldPanel.currentPanel = new HelloWorldPanel(panel, extensionUri, lineofcode);
+    HugReportsPanel.currentPanel = new HugReportsPanel(panel, extensionUri, lineofcode);
   }
 
   /**
    * Cleans up and disposes of webview resources when the webview panel is closed.
    */
   public dispose() {
-    HelloWorldPanel.currentPanel = undefined;
+    HugReportsPanel.currentPanel = undefined;
 
     // Dispose of the current webview panel
     this._panel.dispose();
@@ -150,7 +150,7 @@ export class HelloWorldPanel {
           <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
           <meta name="theme-color" content="#000000">
           <link rel="stylesheet" type="text/css" href="${stylesUri}">
-          <title>Hello World</title>
+          <title>Hug Reports</title>
         </head>
         <body>
           <noscript>You need to enable JavaScript to run this app.</noscript>

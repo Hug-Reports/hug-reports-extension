@@ -86,9 +86,7 @@ export function SayMoreSelectPackage({
   return (
     <div className="sayMoreFormHeader">
       <h2>Say Thanks</h2>
-      <p>
-        Send a personal note to the contributors and let them know how their code has helped you!
-      </p>
+      <p>Send a personal note to let the contributors know how their code has helped you!</p>
 
       <div className="selectedPackages">
         <label id="packageTags">{labelString}</label>
@@ -142,11 +140,11 @@ export function SayMoreSelectModules({ styles, packageModules, setModule }) {
   };
 
   const selectAllOption = () => {
-    if (!(packageModules.includes("Select entire package")) && (packageModules.length >= 1)) {
+    if (!packageModules.includes("Select entire package") && packageModules.length >= 1) {
       const newModules = ["Select entire package"].concat(packageModules);
       setModule(newModules);
-    } 
-  }
+    }
+  };
 
   selectAllOption();
 
@@ -154,12 +152,12 @@ export function SayMoreSelectModules({ styles, packageModules, setModule }) {
     <div className="selectedModules">
       {packageModules.length >= 1 ? (
         <div className={styles.moduleSelectBox}>
-          <br></br>
-          <label id="comboModules">Thank Modules:</label>
+          <label id="comboModules">Select functions you would like to thank:</label>
           <Combobox
+            className={styles.comboBox}
             aria-labelledby="comboModules"
             multiselect={true}
-            placeholder="Select the modules you would like to thank"
+            placeholder="Click to select"
             value={comboxValue}
             onBlur={onBlurModuleSelect}
             onChange={onChangeModuleSelect}
@@ -171,6 +169,7 @@ export function SayMoreSelectModules({ styles, packageModules, setModule }) {
           </Combobox>
         </div>
       ) : null}
+      <br></br>
     </div>
   );
 }
@@ -189,9 +188,15 @@ export function SayMoreForm({ styles }) {
   return (
     <form>
       <div className="useCase">
-        <Label htmlFor="useCase">Describe your specific use case for this package:</Label>
+        <Label htmlFor="useCase">What is your specific use case for this package? </Label>
         <br></br>
-        <Textarea rows={3} id="useCase" name="useCase" className={styles.textbox}></Textarea>
+        <Textarea
+          rows={3}
+          id="useCase"
+          name="useCase"
+          className={styles.textbox}
+          placeholder="Ex. I used functions abc from the efg library to analyze data for my study on xyz."
+        />
       </div>
 
       <div className="helpfulReason">
@@ -201,17 +206,20 @@ export function SayMoreForm({ styles }) {
           rows={3}
           id="helpfulReason"
           name="helpfulReason"
-          className={styles.textbox}></Textarea>
+          className={styles.textbox}
+          placeholder="Ex. Package efg saved me a month on my project xyz."
+        />
       </div>
 
       <div className="personalNote">
-        <Label htmlFor="personalNote">Add a personal note here:</Label>
+        <Label htmlFor="personalNote">Any additional notes?</Label>
         <br></br>
         <Textarea
           rows={3}
           id="personalNote"
           name="personalNote"
-          className={styles.textbox}></Textarea>
+          className={styles.textbox}
+          placeholder="Ex. I thought the design of xyz was nice!"/>
       </div>
 
       <Button appearance="primary">Submit</Button>

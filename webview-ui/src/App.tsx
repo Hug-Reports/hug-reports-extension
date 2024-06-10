@@ -47,7 +47,9 @@ function App() {
       gridTemplateRows: "repeat(1fr)",
       justifyItems: "start",
       ...shorthands.gap("2px"),
-      maxWidth: "400px",
+    },
+    comboBox: {
+      width: "100%",
     },
     wrapper: {
       alignItems: "center",
@@ -84,7 +86,6 @@ function App() {
             modulesDict={modulesDict}
             setModule={setModule}
           />
-
           {selectedPackageOptions.length > 1 ? null : (
             <div className="fillForm">
               <SayMoreSelectModules styles={styles} packageModules={packageModules} setModule={setModule} />

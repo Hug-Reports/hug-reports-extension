@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { HelloWorldPanel } from "./panels/HelloWorldPanel";
+import { HugReportsPanel } from "./panels/HelloWorldPanel";
 import Module = require("module");
 import { ModuleType, PackageDictionary, PackageType, extractModules, extractNames } from "./parser";
 const path = require("path");
@@ -219,7 +219,7 @@ export function activate(context: vscode.ExtensionContext) {
   const showHelloWorldCommand = vscode.commands.registerCommand(
     "hug-reports.showHelloWorld",
     () => {
-      HelloWorldPanel.render(context.extensionUri, dummydata);
+      HugReportsPanel.render(context.extensionUri, dummydata);
     }
   );
 
@@ -251,7 +251,7 @@ export function activate(context: vscode.ExtensionContext) {
     dummydata.button = "form";
     console.log("dummy data");
     console.log(dummydata);
-    HelloWorldPanel.render(context.extensionUri, dummydata);
+    HugReportsPanel.render(context.extensionUri, dummydata);
   });
 
   const openDashboardCommand = vscode.commands.registerCommand(
@@ -282,7 +282,7 @@ export function activate(context: vscode.ExtensionContext) {
       dummydata.button = "dashboard";
       console.log("dummy data");
       console.log(dummydata);
-      HelloWorldPanel.render(context.extensionUri, dummydata);
+      HugReportsPanel.render(context.extensionUri, dummydata);
     }
   );
 
