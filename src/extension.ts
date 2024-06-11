@@ -296,36 +296,62 @@ export function activate(context: vscode.ExtensionContext) {
     async (args) => {
       const lineNumber: number = args.lineNumber;
       if (activeEditor) {
-        activeLine = activeEditor.document.lineAt(args.lineNumber - 1).text;
-        dummydata.linetext = activeLine;
+        if (args) {
+          if (args.lineNumber) {
+            console.log("Line number: " + args.lineNumber);
+            dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
+            console.log("dummy " + dummydata.linetext);
+          }
+        }
 
         let document = activeEditor.document;
         updateImports(document);
         dummydata.modules = getModules(document, args.lineNumber - 1);
-
-        dummydata.modules.forEach(async (packageType) => {
-          const data = {
-            lineNumber: lineNumber,
-            packageName: packageType.packageName,
-            timestamp: new Date(),
-            userId: id,
-          };
-
-          await saveResponseToMongoDB(data);
-        });
-
-        const additionalMessage =
-          "Your thanks has been sent! If you feel inspired to share more, don't hesitate to send a note to the contributors. Your words of encouragement can make a world of difference and let them know just how much their efforts are valued.";
-        const sayMore = "Say More";
-        vscode.window
-          .showInformationMessage(additionalMessage, { modal: true }, { title: sayMore })
-          .then((selectedAction) => {
-            if (selectedAction && selectedAction.title === sayMore) {
-              vscode.commands.executeCommand(`hug-reports.sayMore`);
-              console.log("saying more");
-            }
-          });
       }
+      if (!activeEditor) {
+        if (args) {
+          console.log("No active editor");
+          const document = await vscode.workspace.openTextDocument(args.uri);
+          dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
+          console.log("dummy " + dummydata.linetext);
+          updateImports(document);
+          dummydata.modules = getModules(document, args.lineNumber - 1);
+        }
+      }
+      id = globalState.get("id");
+      if (id) {
+        dummydata.userid = id;
+      }
+      console.log("dummy data");
+      console.log(dummydata);
+      dummydata.modules.forEach(async (module) => {
+        const thanksResponse = await fetch("http://localhost:3000/api/addThanks", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userid: dummydata.userid,
+            packagename: module.packageName,
+            modules: module.modules,
+          }),
+        });
+        const { message, thanks } = await thanksResponse.json();
+        console.log(message);
+        console.log(thanks);
+      });
+
+      const additionalMessage =
+        "Your thanks has been sent! If you feel inspired to share more, don't hesitate to send a note to the contributors. Your words of encouragement can make a world of difference and let them know just how much their efforts are valued.";
+      const sayMore = "Say More";
+      vscode.window
+        .showInformationMessage(additionalMessage, { modal: true }, { title: sayMore })
+        .then((selectedAction) => {
+          if (selectedAction && selectedAction.title === sayMore) {
+            vscode.commands.executeCommand(`hug-reports.sayMore`);
+            console.log("saying more");
+          }
+        });
     }
   );
 
