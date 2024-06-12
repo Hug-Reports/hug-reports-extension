@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import "./App.css";
 import {
   SayMoreNav,
@@ -15,7 +15,12 @@ declare global {
   interface Window {
     lineofcode: any; // Use a more specific type instead of any if possible
     contributors: any;
-    image: any;
+  }
+
+  interface PersonalNote {
+    usecase: string;
+    helpfulreason: string;
+    additional: string;
   }
 }
 
@@ -30,6 +35,13 @@ function App() {
   const [packageModules, setModule] = useState(modulesDict.reduce((acc, pkg) => {
     return acc.concat(pkg.modules.map(moduleType => moduleType.identifier));
   }, []));
+
+
+  const [personalNoteData, setPersonalNote] = useState<PersonalNote>({
+    usecase: '',
+    helpfulreason: '',
+    additional: ''
+  });
 
   const useStyles = makeStyles({
     root: {
@@ -68,6 +80,23 @@ function App() {
   const styles = useStyles();
 
   const [selectedPackageOptions, setSelectedPackageOptions] = useState<string[]>(thankPackages);
+
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setPersonalNote(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  // Handle form submission
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    console.log('Form submitted:', personalNoteData);
+    // Add form submission logic here
+  };
+
 
   return (
     <main className={styles.root}>
