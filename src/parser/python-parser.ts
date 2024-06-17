@@ -1,18 +1,5 @@
 import * as vscode from "vscode";
-export type ModuleType = {
-  searchModules: string;
-  identifier: string;
-};
-
-export type PackageType = {
-  packageName: string;
-  modules: ModuleType[];
-  aliases: string[];
-};
-
-export type PackageDictionary = {
-  [key: number]: PackageType[];
-};
+import { ModuleType, PackageDictionary, PackageType } from "./parser";
 
 export function createPythonPackageObject(
   linenumber: number,
@@ -99,88 +86,7 @@ export function createPythonPackageObject(
   }
 }
 
-export function extractNames(document: vscode.TextDocument) {
-  let match: RegExpExecArray | null;
-  const packageDictionary: PackageDictionary = {};
-  if (document.languageId === "python") {
-    const pyImportRegex = /(^import\s+\S+.*|^from\s+\S+\s+import\s+.*)$/gm;
-    while ((match = pyImportRegex.exec(document.getText()))) {
-      const lineNumber = document.positionAt(match.index).line;
-      const importStatement = match[1].trim();
-      createPythonPackageObject(lineNumber, importStatement, packageDictionary);
-    }
-  } else if (document.languageId === "javascript" || document.languageId === "typescript") {
-    const jsImportRegex = /^import\s+.*\s+from\s+['"](.*)['"]/gm;
-    while ((match = jsImportRegex.exec(document.getText()))) {
-      const fromSplit = match[0].split(/\s+from\s+/);
-      if (
-        fromSplit[1].trim().startsWith('"./') ||
-        fromSplit[1].trim().startsWith('"/') ||
-        fromSplit[1].trim().startsWith("'./") ||
-        fromSplit[1].trim().startsWith("'/")
-      ) {
-        continue;
-      }
-      const lineNumber = document.positionAt(match.index).line;
-      const packageDictEntry: PackageType[] = [];
-      const statements = fromSplit[0]
-        .split(/\s*import\s+/)[1]
-        .split(/\s*,\s*/)
-        .map((item) => item.trim());
-      statements.forEach((item) => {
-        if (/\s+as\s+/.test(item) || item.includes("{") || item.includes("}")) {
-          const asSplit = item.split(/\s+as\s+/);
-          const name = asSplit.length > 1 ? asSplit[1] : item;
-          const bracketSplit = name.split(/\s*\{\s*/);
-          const bracketName = bracketSplit.length > 1 ? bracketSplit[1] : bracketSplit[0];
-          packageDictEntry.push({
-            packageName: bracketName.split(/\s*\}\s*/)[0],
-            modules: [],
-            aliases: [],
-          });
-        } else {
-          packageDictEntry.push({
-            packageName: item,
-            modules: [],
-            aliases: [],
-          });
-        }
-      });
-      packageDictionary[lineNumber] = packageDictEntry;
-    }
-
-    const jsRequireRegex =
-      /(const|let)\s+\{?\s*([\w,\s]+)\s*\}?\s*=\s*require\s*\(\s*['"]([^'"]+)['"]\s*\)[^;]*;/g;
-    while ((match = jsRequireRegex.exec(document.getText()))) {
-      if (match[3].trim().startsWith("./") || match[3].trim().startsWith("/")) {
-        continue;
-      }
-      const lineNumber = document.positionAt(match.index).line;
-      const packageDictEntry: PackageType[] = [];
-      if (match[2].includes(",")) {
-        const splitNames = match[2].replace(/\s/g, "").split(",");
-        splitNames.forEach((name) =>
-          packageDictEntry.push({
-            packageName: name,
-            modules: [],
-            aliases: [],
-          })
-        );
-      } else {
-        packageDictEntry.push({
-          packageName: match[2].trim(),
-          modules: [],
-          aliases: [],
-        });
-      }
-      packageDictionary[lineNumber] = packageDictEntry;
-    }
-  }
-
-  return packageDictionary;
-}
-
-export function extractModules(
+export function extractModulesPython(
   document: vscode.TextDocument,
   alias: string,
   modulesList: ModuleType[],

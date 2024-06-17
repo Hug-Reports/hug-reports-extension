@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { HelloWorldPanel } from "./panels/HelloWorldPanel";
 import Module = require("module");
-import { ModuleType, PackageDictionary, PackageType, extractModules, extractNames } from "./parser";
+import { ModuleType, PackageDictionary, PackageType, extractModules, extractNames } from "./parser/parser";
 const path = require("path");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
