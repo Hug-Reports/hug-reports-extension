@@ -3,7 +3,8 @@ import { HelloWorldPanel } from "./panels/HelloWorldPanel";
 import Module = require("module");
 import { ModuleType, PackageDictionary, PackageType, extractModules, extractNames } from "./parser";
 const path = require("path");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const globals = require("../globals");
+const BACKEND = globals.BACKEND;
 
 let globalState: vscode.Memento;
 let id: string | undefined;
@@ -26,19 +27,7 @@ const darkDecoration: vscode.TextEditorDecorationType =
 
 let hasImport: boolean = false;
 
-const uri =
-  "mongodb+srv://olivia:MA1T5GaLPzIPphQy@researchcluster.zvvxxis.mongodb.net/?retryWrites=true&w=majority";
-
 let lineNumbersName: PackageDictionary = {};
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
 
 interface additionalData {
   userid: string;
@@ -47,6 +36,7 @@ interface additionalData {
   button: string;
   modules: PackageType[];
   theme: string; // light or dark
+  language: string;
 }
 
 type AddData = additionalData;
@@ -119,6 +109,7 @@ export function activate(context: vscode.ExtensionContext) {
     button: "",
     modules: [],
     theme: "light",
+    language: "python",
   };
 
   globalState = context.globalState;
@@ -126,10 +117,8 @@ export function activate(context: vscode.ExtensionContext) {
   if (globalState.get("id")) {
     // id already exists in local storage
     id = globalState.get("id");
-    console.log("ID exists: " + id);
   } else {
     setUserId();
-    console.log("New ID: " + id);
   }
 
   detectColorTheme();
@@ -294,6 +283,7 @@ export function activate(context: vscode.ExtensionContext) {
   const sayThanksCommand = vscode.commands.registerCommand(
     "hug-reports.sayThanks",
     async (args) => {
+      let languageid: string | undefined = activeEditor?.document.languageId;
       const lineNumber: number = args.lineNumber;
       if (activeEditor) {
         if (args) {
@@ -312,6 +302,8 @@ export function activate(context: vscode.ExtensionContext) {
         if (args) {
           console.log("No active editor");
           const document = await vscode.workspace.openTextDocument(args.uri);
+          //get language id of document
+          languageid = document.languageId;
           dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
           console.log("dummy " + dummydata.linetext);
           updateImports(document);
@@ -325,7 +317,14 @@ export function activate(context: vscode.ExtensionContext) {
       console.log("dummy data");
       console.log(dummydata);
       dummydata.modules.forEach(async (module) => {
-        const thanksResponse = await fetch("http://localhost:3000/api/addThanks", {
+        //create a new array that takes module.modules and only pushes the searchModules part of it
+        let searchModules: string[] = [];
+        module.modules.forEach((m) => searchModules.push(m.searchModules));
+        //if search modules is empty, insert ""
+        if (searchModules.length === 0) {
+          searchModules.push("");
+        }
+        const thanksResponse = await fetch(`http://${BACKEND}/addThanks`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -333,7 +332,12 @@ export function activate(context: vscode.ExtensionContext) {
           body: JSON.stringify({
             userid: dummydata.userid,
             packagename: module.packageName,
-            modules: module.modules,
+            modules: searchModules,
+            personalnotes: {
+              note1: "Thank you for your contributions.",
+              note2: "Great work on the random module!",
+            },
+            language: languageid,
           }),
         });
         const { message, thanks } = await thanksResponse.json();
@@ -348,7 +352,7 @@ export function activate(context: vscode.ExtensionContext) {
         .showInformationMessage(additionalMessage, { modal: true }, { title: sayMore })
         .then((selectedAction) => {
           if (selectedAction && selectedAction.title === sayMore) {
-            vscode.commands.executeCommand(`hug-reports.sayMore`);
+            vscode.commands.executeCommand(`hug-reports.sayMore`, args);
             console.log("saying more");
           }
         });
@@ -381,24 +385,20 @@ async function createUserMongoDB() {
   let insertedId: string | undefined;
 
   try {
-    await client.connect();
-
-    const database = client.db("gratitude");
-    const collection = database.collection("users");
-
-    const result = await collection.insertOne({ timestamp: new Date() });
-
-    if (result.insertedId) {
-      console.log("User saved to MongoDB: " + result.insertedId);
-      insertedId = result.insertedId.toString();
-    }
+    const userAddedResponse = await fetch(`http://${BACKEND}/addUser`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: "temp",
+      }),
+    });
+    const { id } = await userAddedResponse.json();
+    insertedId = id;
   } catch (error) {
     console.error("Error saving user to MongoDB: ", error);
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
   }
-
   return insertedId;
 }
 
@@ -408,25 +408,5 @@ async function setUserId() {
     globalState.update("id", id);
   } catch (error) {
     console.error("Error saving user to MongoDB:", error);
-  }
-}
-
-async function saveResponseToMongoDB(response: any) {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
-    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    const database = client.db("gratitude");
-    const collection = database.collection("responses");
-
-    await collection.insertOne(response);
-    console.log("Response saved to MongoDB: " + response);
-  } catch (error) {
-    console.error("Error saving response to MongoDB: ", error);
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
   }
 }
