@@ -29,7 +29,7 @@ export function extractNames(document: vscode.TextDocument) {
     }
   } else if (document.languageId === "javascript" || document.languageId === "typescript") {
     const jsImportRegex =
-      /^import\s+(?:(?:[,\w*\s{}]*\s+from\s+)?["'][^"']+["']|\s*["'][^"']+["'])\s*;?/gm;
+      /^import\s+(?:(?:[,\w*\s{}]*\s+from\s+)?["'][^\."'][^"']+["']|\s*["'][^\."'][^"']+["'])\s*;?/gm;
     while ((match = jsImportRegex.exec(document.getText()))) {
       const lineNumber = document.positionAt(match.index).line;
       const importStatement = match[0].trim();
