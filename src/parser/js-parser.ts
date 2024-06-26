@@ -13,7 +13,8 @@ export function createJSObject(
     const modules: ModuleType[] = [];
     const aliases: string[] = [];
     while (idx < lineArray.length) {
-      if (lineArray[idx] === "from" || lineArray[idx] === '' || lineArray[idx] === ',' || lineArray[idx] === ' ') {
+      const cleanedLine = lineArray[idx].trim();
+      if (lineArray[idx] === "from" || cleanedLine === '' || lineArray[idx] === ',') {
         idx += 1;
         continue;
       }
@@ -28,8 +29,8 @@ export function createJSObject(
           for (let i = 0; i< multipleModules.length - 1; i++) {
             // all except last must just be module name
             modules.push({
-              searchModules: multipleModules[i],
-              identifier: multipleModules[i],
+              searchModules: multipleModules[i].trim(),
+              identifier: multipleModules[i].trim(),
             });
             aliases.push(multipleModules[i]);
           }
@@ -45,11 +46,11 @@ export function createJSObject(
           if (multipleModules.length > 1) {
             lineArray = [...lineArray.slice(0, idx), ...multipleModules, ...lineArray.slice(idx + 1)];
           }
-          aliases.push(lineArray[idx]);
+          aliases.push(lineArray[idx].trim());
           identifier = lineArray[idx];
           idx += 1;
         } else {
-          aliases.push(cleanToken);
+          aliases.push(cleanToken.trim());
         }
   
         modules.push({
