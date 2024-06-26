@@ -156,6 +156,7 @@ const SayMore = ({ lineofcode }) => {
           <div>
             <Dropdown
               multiselect={true}
+              disabled={editURL}
               placeholder="Select the modules you want to thank"
               style={{ width: "100%" }}>
               {dropdownOptions.map((option) => (
@@ -238,8 +239,8 @@ const SayMore = ({ lineofcode }) => {
                 {editURL && (
                   <MessageBar intent="warning" style={{ marginTop: "10px" }}>
                     <MessageBarBody style={{ fontSize: "10px" }}>
-                      Must click "Save" to be able to submit your thanks. To remove your changes
-                      click "Save" and then click "Revert".
+                      Must click "Save" to continue. To remove your changes click "Save" and then
+                      click "Revert".
                     </MessageBarBody>
                   </MessageBar>
                 )}
@@ -347,8 +348,8 @@ const SayMore = ({ lineofcode }) => {
                     </div>
                     <MessageBar intent="warning" style={{ marginTop: "10px" }}>
                       <MessageBarBody style={{ fontSize: "10px" }}>
-                        Must click "Save" to be able to submit your thanks. To remove your changes
-                        click "Save" and then click "Remove".
+                        Must click "Save" to continue. To remove your changes click "Save" and then
+                        click "Remove".
                       </MessageBarBody>
                     </MessageBar>
                   </div>
@@ -395,20 +396,20 @@ const SayMore = ({ lineofcode }) => {
             </div>
             <div>
               <Field size="small" label="What are you using this package for?">
-                <Textarea resize="none" />
+                <Textarea resize="none" disabled={editURL} />
               </Field>
               <Field
                 size="small"
                 label="What about this package did you find helpful?"
                 style={{ marginTop: "10px" }}>
-                <Textarea resize="none" />
+                <Textarea resize="none" disabled={editURL} />
               </Field>
               <Field size="small" label="Anything else?" style={{ marginTop: "10px" }}>
-                <Textarea resize="none" />
+                <Textarea resize="none" disabled={editURL} />
               </Field>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "2rem" }}>
-              <Button size="small" icon={<BiMailSend />}>
+              <Button size="small" icon={<BiMailSend />} disabled={editURL}>
                 Send Hug Report
               </Button>
             </div>
