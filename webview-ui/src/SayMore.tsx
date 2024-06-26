@@ -2,10 +2,8 @@ import "./App.css";
 import { useState, useRef, useEffect } from "react";
 import {
   Button,
+  Field,
   Textarea,
-  TabList,
-  Tab,
-  Label,
   Text,
   Tag,
   TagGroup,
@@ -26,6 +24,7 @@ import { FaGithub, FaPython } from "react-icons/fa";
 import { MdOutlineEdit } from "react-icons/md";
 import { IoIosSave, IoLogoJavascript } from "react-icons/io";
 import { Dismiss12Regular } from "@fluentui/react-icons";
+import { BiMailSend } from "react-icons/bi";
 const globals = require("./front-end-globals");
 const BACKEND = globals.BACKEND;
 
@@ -313,13 +312,24 @@ const SayMore = ({ lineofcode }) => {
                   <div>
                     <div style={{ display: "flex", marginTop: "10px" }}>
                       <div style={{ flex: 6, display: "flex", alignItems: "center" }}>
-                        <Text size={100}>
-                          <em>
-                            URL should have format:
-                            https://github.com/&#123;owner&#125;/&#123;repo&#125;<br></br>Example:
-                            https://github.com/pandas-dev/pandas
-                          </em>
-                        </Text>
+                        {lineofcode.language === "python" && (
+                          <Text size={100}>
+                            <em>
+                              URL should have format:
+                              https://github.com/&#123;owner&#125;/&#123;repo&#125;<br></br>Example:
+                              https://github.com/pandas-dev/pandas
+                            </em>
+                          </Text>
+                        )}
+                        {lineofcode.language === "javascript" && (
+                          <Text size={100}>
+                            <em>
+                              URL should have format:
+                              https://github.com/&#123;owner&#125;/&#123;repo&#125;<br></br>Example:
+                              https://github.com/facebook/react
+                            </em>
+                          </Text>
+                        )}
                       </div>
                       <div style={{ flex: 4 }}></div>
                     </div>
@@ -332,15 +342,30 @@ const SayMore = ({ lineofcode }) => {
                   </div>
                 )}
                 <div style={{ marginTop: "1rem" }}>
-                  <Text size={100}>
-                    <em>
-                      We retrieve GitHub links for the package using the Python Package Index
-                      (PyPI). This package's PyPI page does not contain a link to the repository. We
-                      will find the link manually after your message is submitted. You can help us
-                      by locating and addding a link to the GitHub repository for the package. These
-                      will still be manually verified by our team before thanks are sent.
-                    </em>
-                  </Text>
+                  {lineofcode.language == "python" && (
+                    <Text size={100}>
+                      <em>
+                        We retrieve GitHub links for the package using the Python Package Index
+                        (PyPI) and user contributions. We did not find a link to the repository for
+                        this package on PyPI or in user contributed links. We will find the link
+                        manually after your message is submitted. You can help us by locating and
+                        addding a link to the GitHub repository for the package. These will still be
+                        manually verified by our team before thanks are sent.
+                      </em>
+                    </Text>
+                  )}
+                  {lineofcode.language == "javascript" && (
+                    <Text size={100}>
+                      <em>
+                        We retrieve GitHub links for the package using the npm registry and user
+                        contributions. We did not find a link to the repository for this package on
+                        the npm registry or in user contributed links. We will find the link
+                        manually after your message is submitted. You can help us by locating and
+                        addding a link to the GitHub repository for the package. These will still be
+                        manually verified by our team before thanks are sent.
+                      </em>
+                    </Text>
+                  )}
                 </div>
               </div>
             )
@@ -351,10 +376,29 @@ const SayMore = ({ lineofcode }) => {
           ))}
         <Divider style={{ marginTop: "2rem" }} inset />
         {selectedPackage.length === 1 && (
-          <div>
+          <div style={{ marginBottom: "2rem" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <FaPython />
-              <h6 style={{ marginLeft: "10px" }}>HUG REPORT:</h6>
+              {/* <FaPython /> */}
+              <h6 style={{ marginLeft: "0" }}>HUG REPORT:</h6>
+            </div>
+            <div>
+              <Field size="small" label="What are you using this package for?">
+                <Textarea resize="none" />
+              </Field>
+              <Field
+                size="small"
+                label="What about this package did you find helpful?"
+                style={{ marginTop: "10px" }}>
+                <Textarea resize="none" />
+              </Field>
+              <Field size="small" label="Anything else?" style={{ marginTop: "10px" }}>
+                <Textarea resize="none" />
+              </Field>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "2rem" }}>
+              <Button size="small" icon={<BiMailSend />}>
+                Send Hug Report
+              </Button>
             </div>
           </div>
         )}
