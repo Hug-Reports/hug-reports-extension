@@ -195,7 +195,13 @@ const SayMore = ({ lineofcode }) => {
                       }}
                     />
                   </div>
-                  <div style={{ flex: 4, display: "flex", alignItems: "center" }}>
+                  <div
+                    style={{
+                      flex: 4,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}>
                     {!editURL && (
                       <Button
                         size="small"
@@ -242,11 +248,11 @@ const SayMore = ({ lineofcode }) => {
               <div>
                 <div style={{ display: "flex" }}>
                   <div
-                    style={{ flex: 6, display: "flex", alignItems: "center", marginRight: "10px" }}>
+                    style={{ flex: 5, display: "flex", alignItems: "center", marginRight: "10px" }}>
                     <FaGithub />
                     <h6 style={{ marginLeft: "10px" }}>REPOSITORY:</h6>
                   </div>
-                  <div style={{ flex: 4, display: "flex", alignItems: "center" }}>
+                  <div style={{ flex: 5, display: "flex", alignItems: "center" }}>
                     <Text size={100}>
                       <em>Have a minute to find and add the Github repository?</em>
                     </Text>
@@ -254,7 +260,7 @@ const SayMore = ({ lineofcode }) => {
                 </div>
                 <div style={{ display: "flex" }}>
                   <div
-                    style={{ flex: 6, display: "flex", alignItems: "center", marginRight: "10px" }}>
+                    style={{ flex: 5, display: "flex", alignItems: "center", marginRight: "10px" }}>
                     <Input
                       size="small"
                       style={{ width: "100%" }}
@@ -266,7 +272,13 @@ const SayMore = ({ lineofcode }) => {
                       }}
                     />
                   </div>
-                  <div style={{ flex: 4, display: "flex", alignItems: "center" }}>
+                  <div
+                    style={{
+                      flex: 5,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}>
                     {!editURL && (
                       <Button
                         size="small"
