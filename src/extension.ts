@@ -244,6 +244,7 @@ let hasImport: boolean = false;
 
 let lineNumbersName: PackageDictionary = {};
 let oldLineNumbersName: PackageDictionary = {};
+let filteredLineNumbersName: PackageDictionary = {};
 
 interface additionalData {
   userid: string;
@@ -263,7 +264,6 @@ async function setLineDecorations(activeEditor: vscode.TextEditor) {
     oldLineNumbersName = JSON.parse(JSON.stringify(lineNumbersName));
     let languageid: string | undefined = activeEditor?.document.languageId;
     if (languageid === "python") {
-      let filteredLineNumbersName: PackageDictionary = {};
       for (const [key, value] of Object.entries(lineNumbersName)) {
         const numericKey = Number(key);
         // Check if the package is in the database
@@ -433,46 +433,65 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   const sayMoreCommand = vscode.commands.registerCommand("hug-reports.sayMore", async (args) => {
+    let test = false;
     let languageid: string | undefined = activeEditor?.document.languageId;
-    if (activeEditor) {
-      if (args) {
-        if (args.lineNumber) {
-          console.log("Line number: " + args.lineNumber);
-          dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
-          console.log("dummy " + dummydata.linetext);
-        }
-      }
-
-      let document = activeEditor.document;
-      updateImports(document);
-      dummydata.modules = getModules(document, args.lineNumber - 1);
-    }
     if (!activeEditor) {
       if (args) {
-        console.log("No active editor");
         const document = await vscode.workspace.openTextDocument(args.uri);
+        //get language id of document
         languageid = document.languageId;
-        dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
-        console.log("dummy " + dummydata.linetext);
+      }
+    }
+    if (languageid === "python") {
+      if (args.lineNumber - 1 in filteredLineNumbersName) {
+        test = true;
+      }
+    } else if (languageid === "javascript" || languageid === "typescript") {
+      if (args.lineNumber - 1 in lineNumbersName) {
+        test = true;
+      }
+    }
+    if (test) {
+      if (activeEditor) {
+        if (args) {
+          if (args.lineNumber) {
+            console.log("Line number: " + args.lineNumber);
+            dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
+            console.log("dummy " + dummydata.linetext);
+          }
+        }
+
+        let document = activeEditor.document;
         updateImports(document);
         dummydata.modules = getModules(document, args.lineNumber - 1);
       }
+      if (!activeEditor) {
+        if (args) {
+          console.log("No active editor");
+          const document = await vscode.workspace.openTextDocument(args.uri);
+          languageid = document.languageId;
+          dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
+          console.log("dummy " + dummydata.linetext);
+          updateImports(document);
+          dummydata.modules = getModules(document, args.lineNumber - 1);
+        }
+      }
+      dummydata.tab = "form";
+      dummydata.button = "form";
+      id = globalState.get("id");
+      if (id) {
+        dummydata.userid = id;
+      }
+      if (languageid) {
+        dummydata.language = languageid;
+      }
+      if (currentColorTheme) {
+        dummydata.theme = currentColorTheme;
+      }
+      console.log("dummy data");
+      console.log(dummydata);
+      HelloWorldPanel.render(context.extensionUri, dummydata);
     }
-    dummydata.tab = "form";
-    dummydata.button = "form";
-    id = globalState.get("id");
-    if (id) {
-      dummydata.userid = id;
-    }
-    if (languageid) {
-      dummydata.language = languageid;
-    }
-    if (currentColorTheme) {
-      dummydata.theme = currentColorTheme;
-    }
-    console.log("dummy data");
-    console.log(dummydata);
-    HelloWorldPanel.render(context.extensionUri, dummydata);
   });
 
   const openDashboardCommand = vscode.commands.registerCommand(
@@ -510,72 +529,91 @@ export function activate(context: vscode.ExtensionContext) {
   const sayThanksCommand = vscode.commands.registerCommand(
     "hug-reports.sayThanks",
     async (args) => {
+      let test = false;
       let languageid: string | undefined = activeEditor?.document.languageId;
-      const lineNumber: number = args.lineNumber;
-      if (activeEditor) {
-        if (args) {
-          if (args.lineNumber) {
-            console.log("Line number: " + args.lineNumber);
-            dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
-            console.log("dummy " + dummydata.linetext);
-          }
-        }
-
-        let document = activeEditor.document;
-        updateImports(document);
-        dummydata.modules = getModules(document, args.lineNumber - 1);
-      }
       if (!activeEditor) {
         if (args) {
-          console.log("No active editor");
           const document = await vscode.workspace.openTextDocument(args.uri);
           //get language id of document
           languageid = document.languageId;
-          dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
-          console.log("dummy " + dummydata.linetext);
+        }
+      }
+      if (languageid === "python") {
+        if (args.lineNumber - 1 in filteredLineNumbersName) {
+          test = true;
+        }
+      } else if (languageid === "javascript" || languageid === "typescript") {
+        if (args.lineNumber - 1 in lineNumbersName) {
+          test = true;
+        }
+      }
+      if (test) {
+        const lineNumber: number = args.lineNumber;
+        if (activeEditor) {
+          if (args) {
+            if (args.lineNumber) {
+              console.log("Line number: " + args.lineNumber);
+              dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
+              console.log("dummy " + dummydata.linetext);
+            }
+          }
+
+          let document = activeEditor.document;
           updateImports(document);
           dummydata.modules = getModules(document, args.lineNumber - 1);
         }
-      }
-      id = globalState.get("id");
-      if (id) {
-        dummydata.userid = id;
-      }
-      console.log("dummy data");
-      console.log(dummydata);
-      dummydata.modules.forEach(async (module) => {
-        const thanksResponse = await fetch(`http://${BACKEND}/addThanks`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userid: dummydata.userid,
-            packagename: module.packageName,
-            modules: [""],
-            personalnotes: {
-              note1: "Thank you for your contributions.",
-              note2: "Great work on the random module!",
-            },
-            language: languageid,
-          }),
-        });
-        const { message, thanks } = await thanksResponse.json();
-        console.log(message);
-        console.log(thanks);
-      });
-
-      const additionalMessage =
-        "Your thanks has been sent! If you feel inspired to share more, don't hesitate to send a note to the contributors. Your words of encouragement can make a world of difference and let them know just how much their efforts are valued.";
-      const sayMore = "Say More";
-      vscode.window
-        .showInformationMessage(additionalMessage, { modal: true }, { title: sayMore })
-        .then((selectedAction) => {
-          if (selectedAction && selectedAction.title === sayMore) {
-            vscode.commands.executeCommand(`hug-reports.sayMore`, args);
-            console.log("saying more");
+        if (!activeEditor) {
+          if (args) {
+            console.log("No active editor");
+            const document = await vscode.workspace.openTextDocument(args.uri);
+            //get language id of document
+            languageid = document.languageId;
+            dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
+            console.log("dummy " + dummydata.linetext);
+            updateImports(document);
+            dummydata.modules = getModules(document, args.lineNumber - 1);
           }
+        }
+        id = globalState.get("id");
+        if (id) {
+          dummydata.userid = id;
+        }
+        console.log("dummy data");
+        console.log(dummydata);
+        dummydata.modules.forEach(async (module) => {
+          const thanksResponse = await fetch(`http://${BACKEND}/addThanks`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userid: dummydata.userid,
+              packagename: module.packageName,
+              modules: [""],
+              personalnotes: {
+                note1: "Thank you for your contributions.",
+                note2: "Great work on the random module!",
+              },
+              language: languageid,
+            }),
+          });
+          const { message, thanks } = await thanksResponse.json();
+          console.log(message);
+          console.log(thanks);
         });
+
+        const additionalMessage =
+          "Your thanks has been sent! If you feel inspired to share more, don't hesitate to send a note to the contributors. Your words of encouragement can make a world of difference and let them know just how much their efforts are valued.";
+        const sayMore = "Say More";
+        vscode.window
+          .showInformationMessage(additionalMessage, { modal: true }, { title: sayMore })
+          .then((selectedAction) => {
+            if (selectedAction && selectedAction.title === sayMore) {
+              vscode.commands.executeCommand(`hug-reports.sayMore`, args);
+              console.log("saying more");
+            }
+          });
+      }
     }
   );
 
