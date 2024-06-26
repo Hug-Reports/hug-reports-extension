@@ -17,6 +17,7 @@ import {
   MessageBarBody,
   Input,
   Option,
+  Tooltip,
 } from "@fluentui/react-components";
 import { Edit16Filled, ArrowUndo16Filled } from "@fluentui/react-icons";
 import type { ComboboxProps } from "@fluentui/react-components";
@@ -39,6 +40,10 @@ const SayMore = ({ lineofcode }) => {
   const [editableURL, setEditableURL] = useState("");
   const inputRef = useRef(null);
   const contributeRef = useRef(null);
+  const [selectedModules, setSelectedModules] = useState([]);
+  const [note1, setNote1] = useState("");
+  const [note2, setNote2] = useState("");
+  const [note3, setNote3] = useState("");
 
   const removeItem: TagGroupProps["onDismiss"] = (_e, { value }) => {
     setSelectedPackage([...selectedPackage].filter((tag) => tag.value !== value));
@@ -70,6 +75,46 @@ const SayMore = ({ lineofcode }) => {
     });
     const { url } = await linkResponse.json();
     setGithubUrl(url);
+  };
+
+  const handleSubmit = async () => {
+    let thanksModules = [...selectedModules];
+    if (thanksModules.includes("entire")) {
+      //replace "entire" with a ""
+      thanksModules = thanksModules.map((item) => (item === "entire" ? "" : item));
+    }
+    if (thanksModules.length === 0) {
+      thanksModules = [""];
+    }
+    if (githubUrl !== "") {
+      if (githubUrl !== "No GitHub URL found") {
+        if (editableURL === githubUrl) {
+          const thanksResponse = await fetch(`http://${BACKEND}/addThanks`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userid: lineofcode.userid,
+              packagename: selectedPackage[0].child,
+              modules: thanksModules,
+              personalnotes: {
+                note_1: note1.trim(),
+                note_2: note2.trim(),
+                note_3: note3.trim(),
+              },
+              language: lineofcode.language,
+            }),
+          });
+          const { message, thanks } = await thanksResponse.json();
+          console.log(message);
+        } else {
+          //new url suggested
+        }
+      } else {
+        //new url suggested or required
+      }
+    }
   };
 
   useEffect(() => {
@@ -106,7 +151,7 @@ const SayMore = ({ lineofcode }) => {
       //get value for the selected package
       const selectedPackageModules = lineofcode.modules[selectedPackage[0].value].modules;
       setDropdownOptions([
-        { searchModules: "", identifier: "thank entire package" },
+        { searchModules: "entire", identifier: "thank entire package" },
         ...selectedPackageModules,
       ]);
       fetchGithubUrl(selectedPackage[0].child);
@@ -157,10 +202,22 @@ const SayMore = ({ lineofcode }) => {
             <Dropdown
               multiselect={true}
               disabled={editURL}
-              placeholder="Select the modules you want to thank"
+              selectedOptions={selectedModules}
+              onOptionSelect={(e, data) => {
+                console.log(selectedModules);
+                if (selectedModules.includes(data.optionValue)) {
+                  setSelectedModules(selectedModules.filter((item) => item !== data.optionValue));
+                  return;
+                } else {
+                  setSelectedModules([...selectedModules, data.optionValue]);
+                }
+              }}
+              placeholder="Select the modules you want to thank (default: entire package)"
               style={{ width: "100%" }}>
               {dropdownOptions.map((option) => (
-                <Option key={option.searchModules}>{option.identifier}</Option>
+                <Option key={option.searchModules} value={option.searchModules}>
+                  {option.identifier}
+                </Option>
               ))}
             </Dropdown>
             <Divider style={{ marginTop: "2rem" }} inset />
@@ -396,22 +453,59 @@ const SayMore = ({ lineofcode }) => {
             </div>
             <div>
               <Field size="small" label="What are you using this package for?">
-                <Textarea resize="none" disabled={editURL} />
+                <Textarea
+                  resize="none"
+                  disabled={editURL}
+                  value={note1}
+                  onChange={(e, data) => {
+                    setNote1(data.value);
+                  }}
+                />
               </Field>
               <Field
                 size="small"
                 label="What about this package did you find helpful?"
                 style={{ marginTop: "10px" }}>
-                <Textarea resize="none" disabled={editURL} />
+                <Textarea
+                  resize="none"
+                  disabled={editURL}
+                  value={note2}
+                  onChange={(e, data) => {
+                    setNote2(data.value);
+                  }}
+                />
               </Field>
               <Field size="small" label="Anything else?" style={{ marginTop: "10px" }}>
-                <Textarea resize="none" disabled={editURL} />
+                <Textarea
+                  resize="none"
+                  disabled={editURL}
+                  value={note3}
+                  onChange={(e, data) => {
+                    setNote3(data.value);
+                  }}
+                />
               </Field>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "2rem" }}>
-              <Button size="small" icon={<BiMailSend />} disabled={editURL}>
-                Send Hug Report
-              </Button>
+              <Tooltip
+                content={
+                  editURL
+                    ? "Save changes to repository link"
+                    : note1.trim() === "" && note2.trim() === "" && note3.trim() === ""
+                    ? "Atleast one of the above text fields must contain content to send a hug report."
+                    : ""
+                }
+                relationship="description">
+                <Button
+                  size="small"
+                  icon={<BiMailSend />}
+                  disabled={
+                    editURL || (note1.trim() === "" && note2.trim() === "" && note3.trim() === "")
+                  }
+                  onClick={handleSubmit}>
+                  Send Hug Report
+                </Button>
+              </Tooltip>
             </div>
           </div>
         )}
