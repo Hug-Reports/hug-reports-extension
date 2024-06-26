@@ -1,220 +1,365 @@
 import "./App.css";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Button,
   Textarea,
   TabList,
   Tab,
   Label,
-  SelectTabData,
-  SelectTabEvent,
+  Text,
+  Tag,
+  TagGroup,
+  TagGroupProps,
+  Divider,
+  Dropdown,
   Combobox,
+  Skeleton,
+  SkeletonItem,
+  MessageBar,
+  MessageBarBody,
+  Input,
   Option,
 } from "@fluentui/react-components";
+import { Edit16Filled, ArrowUndo16Filled } from "@fluentui/react-icons";
 import type { ComboboxProps } from "@fluentui/react-components";
+import { FaGithub, FaPython } from "react-icons/fa";
+import { MdOutlineEdit } from "react-icons/md";
+import { IoIosSave } from "react-icons/io";
 import { Dismiss12Regular } from "@fluentui/react-icons";
+const globals = require("./front-end-globals");
+const BACKEND = globals.BACKEND;
 
-export function SayMoreNav({ page, setPage, setTab }) {
-  const onSayMoreTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
-    if (data.value === "form") {
-      setTab("form");
-      setPage("form");
-    } else {
-      setTab("recently thanked");
-      setPage("dashboard");
+const SayMore = ({ lineofcode }) => {
+  const [selectedPackage, setSelectedPackage] = useState(
+    lineofcode.modules.map((item, index) => ({ value: index, child: item.packageName }))
+  );
+  const [dropdownOptions, setDropdownOptions] = useState([]);
+  const [githubUrl, setGithubUrl] = useState("");
+  const [fetchedURL, setFetchedURL] = useState(false);
+  const [editURL, setEditURL] = useState(false);
+  const [editableURL, setEditableURL] = useState("");
+  const inputRef = useRef(null);
+  const contributeRef = useRef(null);
+
+  const removeItem: TagGroupProps["onDismiss"] = (_e, { value }) => {
+    setSelectedPackage([...selectedPackage].filter((tag) => tag.value !== value));
+  };
+
+  const handleRemoveContributedLink = () => {
+    if (lineofcode.language == "python") {
+      setEditableURL(
+        "We were unable to find the GitHub URL for this package from the Python Package Index."
+      );
+    } else if (lineofcode.language == "javascript") {
+      setEditableURL(
+        "We were unable to find the GitHub URL for this package from the npm registry."
+      );
     }
   };
 
-  return (
-    <div className="navigation">
-      <TabList selectedValue={page} onTabSelect={onSayMoreTabSelect}>
-        <Tab value="form">Say More</Tab>
-        <Tab value="dashboard">Dashboard</Tab>
-      </TabList>
-    </div>
-  );
-}
+  //define an async function
+  const fetchGithubUrl = async (packagename) => {
+    const linkResponse = await fetch(`http://${BACKEND}/getGithub`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        packageName: packagename,
+        language: lineofcode.language,
+      }),
+    });
+    const { url } = await linkResponse.json();
+    setGithubUrl(url);
+  };
 
-export function SayMoreSelectPackage({
-  styles,
-  selectedPackageOptions,
-  setSelectedPackageOptions,
-  modulesDict,
-  setModule,
-}) {
-  const selectedPackageListRef = useRef<HTMLUListElement>(null);
-  // const [test, setTest] = useState("");
-
-  const onTagClick = (option: string, index: number) => {
-    let newSelectedPackages = selectedPackageOptions;
-    // remove selected option
-    if (selectedPackageOptions.length > 1) {
-      newSelectedPackages = selectedPackageOptions.filter((o) => o !== option);
-      setSelectedPackageOptions(newSelectedPackages);
-
-      // focus previous or next option, defaulting to focusing back to the combo input
-      const indexToFocus = index === 0 ? 1 : index - 1;
-      const optionToFocus = selectedPackageListRef.current?.querySelector(
-        `#packageTags-remove-${indexToFocus}`
-      );
-      if (optionToFocus) {
-        (optionToFocus as HTMLButtonElement).focus();
+  useEffect(() => {
+    if (githubUrl !== "") {
+      setFetchedURL(true);
+      if (githubUrl === "No GitHub URL found") {
+        if (lineofcode.language == "python") {
+          setEditableURL(
+            "We were unable to find the GitHub URL for this package from the Python Package Index."
+          );
+        } else if (lineofcode.language == "javascript") {
+          setEditableURL(
+            "We were unable to find the GitHub URL for this package from the npm registry."
+          );
+        }
+      } else {
+        setEditableURL(githubUrl);
       }
     }
+  }, [githubUrl]);
 
-    const filteredModules = modulesDict.filter((entry) =>
-      newSelectedPackages.includes(entry.packageName)
-    );
+  useEffect(() => {
+    if (editURL) {
+      if (githubUrl !== "No GitHub URL found") {
+        inputRef.current.focus();
+      } else {
+        contributeRef.current.focus();
+      }
+    }
+  }, [editURL]);
 
-    const newModules = filteredModules.reduce((acc, pkg) => {
-      return acc.concat(pkg.modules.map((moduleType) => moduleType.identifier));
-    }, []);
-
-    setModule(newModules);
-  };
-
-  let labelString: string;
-  let tagSymbol: boolean;
-  if (selectedPackageOptions.length > 1) {
-    labelString = "Please select a package to thank: ";
-    tagSymbol = true;
-  } else {
-    labelString = "You are thanking the following package: ";
-    tagSymbol = false;
-  }
+  useEffect(() => {
+    if (selectedPackage.length === 1) {
+      //get value for the selected package
+      const selectedPackageModules = lineofcode.modules[selectedPackage[0].value].modules;
+      setDropdownOptions([
+        { searchModules: "", identifier: "thank entire package" },
+        ...selectedPackageModules,
+      ]);
+      fetchGithubUrl(selectedPackage[0].child);
+    }
+  }, [selectedPackage]);
 
   return (
-    <div className="sayMoreFormHeader">
-      <h2>Say Thanks</h2>
-      <p>
-        Send a personal note to the contributors and let them know how their code has helped you!
-      </p>
-
-      <div className="selectedPackages">
-        <label id="packageTags">{labelString}</label>
-        <ul className={styles.tagsList}>
-          {selectedPackageOptions.map((option, i) => (
-            <li key={option}>
-              <Button
-                size="small"
-                shape="circular"
-                appearance="primary"
-                icon={tagSymbol ? <Dismiss12Regular /> : null}
-                iconPosition="after"
-                onClick={() => onTagClick(option, i)}
-                id={`packageTags-remove-${i}`}
-                aria-labelledby={`packageTags-remove packageTags-remove-${i}`}>
-                {option}
-              </Button>
-            </li>
-          ))}
-        </ul>
+    <div style={{ width: "100%" }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <FaPython />
+        <h6 style={{ marginLeft: "10px" }}>PACKAGE:</h6>
       </div>
-    </div>
-  );
-}
-
-export function SayMoreSelectModules({ styles, packageModules, setModule }) {
-  const [selectedOptions, setSelectedOptions] = useState([]);
-  const [comboxValue, setComboValue] = useState("");
-
-  const onSelectModuleSelect: ComboboxProps["onOptionSelect"] = (event, data) => {
-    // update selectedOptions
-    setSelectedOptions(data.selectedOptions);
-
-    // reset value to an empty string after selection
-    setComboValue("");
-  };
-
-  // clear value on focus
-  const onFocusModuleSelect = () => {
-    setComboValue("");
-  };
-
-  // update value to selected options on blur
-  const onBlurModuleSelect = () => {
-    setComboValue(selectedOptions.join(", "));
-  };
-
-  // update value on input change
-  const onChangeModuleSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setComboValue(event.target.value);
-  };
-
-  const selectAllOption = () => {
-    if (!(packageModules.includes("Select entire package")) && (packageModules.length >= 1)) {
-      const newModules = ["Select entire package"].concat(packageModules);
-      setModule(newModules);
-    } 
-  }
-
-  selectAllOption();
-
-  return (
-    <div className="selectedModules">
-      {packageModules.length >= 1 ? (
-        <div className={styles.moduleSelectBox}>
-          <br></br>
-          <label id="comboModules">Thank Modules:</label>
-          <Combobox
-            aria-labelledby="comboModules"
-            multiselect={true}
-            placeholder="Select the modules you would like to thank"
-            value={comboxValue}
-            onBlur={onBlurModuleSelect}
-            onChange={onChangeModuleSelect}
-            onFocus={onFocusModuleSelect}
-            onOptionSelect={onSelectModuleSelect}>
-            {packageModules.map((amodule) => (
-              <Option key={amodule}>{amodule}</Option>
+      <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: 0 }}>
+        {selectedPackage.length > 1 && (
+          <TagGroup onDismiss={removeItem} aria-label="Dismiss example">
+            {selectedPackage.map((tag, index) => (
+              <Tag
+                dismissible
+                dismissIcon={{ "aria-label": "remove" }}
+                value={tag.value}
+                key={tag.value}>
+                {tag.child}
+              </Tag>
             ))}
-          </Combobox>
+          </TagGroup>
+        )}
+        {selectedPackage.length == 1 && (
+          <TagGroup>
+            {selectedPackage.map((tag, index) => (
+              <Tag value={tag.value} key={tag.value}>
+                {tag.child}
+              </Tag>
+            ))}
+          </TagGroup>
+        )}
+      </div>
+      {selectedPackage.length > 1 && (
+        <div style={{ marginTop: "1rem" }}>
+          <Text size={100}>
+            <em>Retain one to proceed</em>
+          </Text>
         </div>
-      ) : null}
+      )}
+      <div style={{ width: "100%", marginTop: "1rem" }}>
+        {dropdownOptions.length > 0 && (
+          <div>
+            <Dropdown
+              multiselect={true}
+              placeholder="Select the modules you want to thank"
+              style={{ width: "100%" }}>
+              {dropdownOptions.map((option) => (
+                <Option key={option.searchModules}>{option.identifier}</Option>
+              ))}
+            </Dropdown>
+            <Divider style={{ marginTop: "2rem" }} inset />
+          </div>
+        )}
+        {selectedPackage.length === 1 &&
+          (fetchedURL == true ? (
+            githubUrl !== "No GitHub URL found" ? (
+              <div>
+                <div style={{ display: "flex" }}>
+                  <div
+                    style={{ flex: 6, display: "flex", alignItems: "center", marginRight: "10px" }}>
+                    <FaGithub />
+                    <h6 style={{ marginLeft: "10px" }}>REPOSITORY:</h6>
+                  </div>
+                  <div style={{ flex: 4, display: "flex", alignItems: "center" }}>
+                    <Text size={100}>
+                      <em>Doesn't look right?</em>
+                    </Text>
+                  </div>
+                </div>
+                <div style={{ display: "flex" }}>
+                  <div
+                    style={{ flex: 6, display: "flex", alignItems: "center", marginRight: "10px" }}>
+                    <Input
+                      size="small"
+                      style={{ width: "100%" }}
+                      value={editableURL}
+                      readOnly={!editURL}
+                      ref={inputRef}
+                      onChange={(e) => {
+                        setEditableURL(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 4, display: "flex", alignItems: "center" }}>
+                    {!editURL && (
+                      <Button
+                        size="small"
+                        icon={<MdOutlineEdit />}
+                        style={{ marginRight: "5px" }}
+                        onClick={() => {
+                          setEditURL(!editURL);
+                        }}>
+                        Edit
+                      </Button>
+                    )}
+                    {editURL && (
+                      <Button
+                        size="small"
+                        icon={<IoIosSave />}
+                        style={{ marginRight: "5px" }}
+                        onClick={() => {
+                          setEditURL(!editURL);
+                        }}>
+                        Save
+                      </Button>
+                    )}
+                    <Button
+                      disabled={editURL || editableURL === githubUrl}
+                      size="small"
+                      icon={<ArrowUndo16Filled />}
+                      onClick={() => {
+                        setEditableURL(githubUrl);
+                      }}>
+                      Revert
+                    </Button>
+                  </div>
+                </div>
+                {editURL && (
+                  <MessageBar intent="warning" style={{ marginTop: "10px" }}>
+                    <MessageBarBody style={{ fontSize: "10px" }}>
+                      Must click "Save" to be able to submit your thanks. To remove your changes
+                      click "Save" and then click "Revert".
+                    </MessageBarBody>
+                  </MessageBar>
+                )}
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: "flex" }}>
+                  <div
+                    style={{ flex: 6, display: "flex", alignItems: "center", marginRight: "10px" }}>
+                    <FaGithub />
+                    <h6 style={{ marginLeft: "10px" }}>REPOSITORY:</h6>
+                  </div>
+                  <div style={{ flex: 4, display: "flex", alignItems: "center" }}>
+                    <Text size={100}>
+                      <em>Have a minute to find and add the Github repository?</em>
+                    </Text>
+                  </div>
+                </div>
+                <div style={{ display: "flex" }}>
+                  <div
+                    style={{ flex: 6, display: "flex", alignItems: "center", marginRight: "10px" }}>
+                    <Input
+                      size="small"
+                      style={{ width: "100%" }}
+                      value={editableURL}
+                      readOnly={!editURL}
+                      ref={contributeRef}
+                      onChange={(e) => {
+                        setEditableURL(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 4, display: "flex", alignItems: "center" }}>
+                    {!editURL && (
+                      <Button
+                        size="small"
+                        icon={<MdOutlineEdit />}
+                        style={{ marginRight: "5px" }}
+                        onClick={() => {
+                          setEditURL(!editURL);
+                          setEditableURL("");
+                        }}>
+                        Contribute
+                      </Button>
+                    )}
+                    {editURL && (
+                      <Button
+                        size="small"
+                        icon={<IoIosSave />}
+                        style={{ marginRight: "5px" }}
+                        onClick={() => {
+                          setEditURL(!editURL);
+                          if (editableURL === "") {
+                            handleRemoveContributedLink();
+                          }
+                        }}>
+                        Save
+                      </Button>
+                    )}
+                    <Button
+                      disabled={
+                        editURL ||
+                        editableURL ===
+                          "We were unable to find the GitHub URL for this package from the Python Package Index." ||
+                        editableURL ===
+                          "We were unable to find the GitHub URL for this package from the npm registry."
+                      }
+                      size="small"
+                      icon={<ArrowUndo16Filled />}
+                      onClick={handleRemoveContributedLink}>
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+                {editURL && (
+                  <div>
+                    <div style={{ display: "flex", marginTop: "10px" }}>
+                      <div style={{ flex: 6, display: "flex", alignItems: "center" }}>
+                        <Text size={100}>
+                          <em>
+                            URL should have format:
+                            https://github.com/&#123;owner&#125;/&#123;repo&#125;<br></br>Example:
+                            https://github.com/pandas-dev/pandas
+                          </em>
+                        </Text>
+                      </div>
+                      <div style={{ flex: 4 }}></div>
+                    </div>
+                    <MessageBar intent="warning" style={{ marginTop: "10px" }}>
+                      <MessageBarBody style={{ fontSize: "10px" }}>
+                        Must click "Save" to be able to submit your thanks. To remove your changes
+                        click "Save" and then click "Remove".
+                      </MessageBarBody>
+                    </MessageBar>
+                  </div>
+                )}
+                <div style={{ marginTop: "1rem" }}>
+                  <Text size={100}>
+                    <em>
+                      We retrieve GitHub links for the package using the Python Package Index
+                      (PyPI). This package's PyPI page does not contain a link to the repository. We
+                      will find the link manually after your message is submitted. You can help us
+                      by locating and addding a link to the GitHub repository for the package. These
+                      will still be manually verified by our team before thanks are sent.
+                    </em>
+                  </Text>
+                </div>
+              </div>
+            )
+          ) : (
+            <Skeleton style={{ marginTop: "1rem" }}>
+              <SkeletonItem />
+            </Skeleton>
+          ))}
+        <Divider style={{ marginTop: "2rem" }} inset />
+        {selectedPackage.length === 1 && (
+          <div>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <FaPython />
+              <h6 style={{ marginLeft: "10px" }}>HUG REPORT:</h6>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
-}
+};
 
-export function SayMoreContributors() {
-  const contributors = ["usera", "userb", "userc", "userd", "usere"];
-  return (
-    <div className="contributors">
-      <p>Your thanks goes to:</p>
-      <p>{contributors.join(", ")}</p>
-    </div>
-  );
-}
-
-export function SayMoreForm({ styles }) {
-  return (
-    <form>
-      <div className="useCase">
-        <Label htmlFor="useCase">Describe your specific use case for this package:</Label>
-        <br></br>
-        <Textarea rows={3} id="useCase" name="useCase" className={styles.textbox}></Textarea>
-      </div>
-
-      <div className="helpfulReason">
-        <Label htmlFor="helpfulReason">Why was this package useful?</Label>
-        <br></br>
-        <Textarea
-          rows={3}
-          id="helpfulReason"
-          name="helpfulReason"
-          className={styles.textbox}></Textarea>
-      </div>
-
-      <div className="personalNote">
-        <Label htmlFor="personalNote">Add a personal note here:</Label>
-        <br></br>
-        <Textarea
-          rows={3}
-          id="personalNote"
-          name="personalNote"
-          className={styles.textbox}></Textarea>
-      </div>
-
-      <Button appearance="primary">Submit</Button>
-    </form>
-  );
-}
+export default SayMore;

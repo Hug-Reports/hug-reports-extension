@@ -6,6 +6,215 @@ const path = require("path");
 const globals = require("../globals");
 const BACKEND = globals.BACKEND;
 
+const blockedPythonModules = [
+  "__future__",
+  "__main__",
+  "_thread",
+  "_tkinter",
+  "abc",
+  "aifc",
+  "argparse",
+  "array",
+  "ast",
+  "asyncio",
+  "atexit",
+  "audioop",
+  "base64",
+  "bdb",
+  "binascii",
+  "bisect",
+  "builtins",
+  "bz2",
+  "calendar",
+  "cgi",
+  "cgitb",
+  "chunk",
+  "cmath",
+  "cmd",
+  "code",
+  "codecs",
+  "codeop",
+  "collections",
+  "colorsys",
+  "compileall",
+  "concurrent",
+  "configparser",
+  "contextlib",
+  "contextvars",
+  "copy",
+  "copyreg",
+  "cProfile",
+  "crypt",
+  "csv",
+  "ctypes",
+  "curses",
+  "dataclasses",
+  "datetime",
+  "dbm",
+  "decimal",
+  "difflib",
+  "dis",
+  "doctest",
+  "email",
+  "encodings",
+  "ensurepip",
+  "enum",
+  "errno",
+  "faulthandler",
+  "fcntl",
+  "filecmp",
+  "fileinput",
+  "fnmatch",
+  "fractions",
+  "ftplib",
+  "functools",
+  "gc",
+  "getopt",
+  "getpass",
+  "gettext",
+  "glob",
+  "graphlib",
+  "grp",
+  "gzip",
+  "hashlib",
+  "heapq",
+  "hmac",
+  "html",
+  "http",
+  "idlelib",
+  "imaplib",
+  "imghdr",
+  "importlib",
+  "inspect",
+  "io",
+  "ipaddress",
+  "itertools",
+  "json",
+  "keyword",
+  "lib2to3",
+  "linecache",
+  "locale",
+  "logging",
+  "lzma",
+  "mailbox",
+  "mailcap",
+  "marshal",
+  "math",
+  "mimetypes",
+  "mmap",
+  "modulefinder",
+  "msilib",
+  "msvcrt",
+  "multiprocessing",
+  "netrc",
+  "nis",
+  "nntplib",
+  "numbers",
+  "operator",
+  "optparse",
+  "os",
+  "ossaudiodev",
+  "pathlib",
+  "pdb",
+  "pickle",
+  "pickletools",
+  "pipes",
+  "pkgutil",
+  "platform",
+  "plistlib",
+  "poplib",
+  "posix",
+  "pprint",
+  "profile",
+  "pstats",
+  "pty",
+  "pwd",
+  "py_compile",
+  "pyclbr",
+  "pydoc",
+  "queue",
+  "quopri",
+  "random",
+  "re",
+  "readline",
+  "reprlib",
+  "resource",
+  "rlcompleter",
+  "runpy",
+  "sched",
+  "secrets",
+  "select",
+  "selectors",
+  "shelve",
+  "shlex",
+  "shutil",
+  "signal",
+  "site",
+  "sitecustomize",
+  "smtplib",
+  "sndhdr",
+  "socket",
+  "socketserver",
+  "spwd",
+  "sqlite3",
+  "ssl",
+  "stat",
+  "statistics",
+  "string",
+  "stringprep",
+  "struct",
+  "subprocess",
+  "sunau",
+  "symtable",
+  "sys",
+  "sysconfig",
+  "syslog",
+  "tabnanny",
+  "tarfile",
+  "telnetlib",
+  "tempfile",
+  "termios",
+  "test",
+  "textwrap",
+  "threading",
+  "time",
+  "timeit",
+  "tkinter",
+  "token",
+  "tokenize",
+  "tomllib",
+  "trace",
+  "traceback",
+  "tracemalloc",
+  "tty",
+  "turtle",
+  "turtledemo",
+  "types",
+  "typing",
+  "unicodedata",
+  "unittest",
+  "urllib",
+  "usercustomize",
+  "uu",
+  "uuid",
+  "venv",
+  "warnings",
+  "wave",
+  "weakref",
+  "webbrowser",
+  "winreg",
+  "winsound",
+  "wsgiref",
+  "xdrlib",
+  "xml",
+  "xmlrpc",
+  "zipapp",
+  "zipfile",
+  "zipimport",
+  "zlib",
+  "zoneinfo",
+];
+
 let globalState: vscode.Memento;
 let id: string | undefined;
 let currentColorTheme: string | undefined;
@@ -28,6 +237,7 @@ const darkDecoration: vscode.TextEditorDecorationType =
 let hasImport: boolean = false;
 
 let lineNumbersName: PackageDictionary = {};
+let oldLineNumbersName: PackageDictionary = {};
 
 interface additionalData {
   userid: string;
@@ -41,6 +251,40 @@ interface additionalData {
 
 type AddData = additionalData;
 
+async function setLineDecorations(activeEditor: vscode.TextEditor) {
+  if (JSON.stringify(lineNumbersName) !== JSON.stringify(oldLineNumbersName)) {
+    //copy lineNumbersName to oldLineNumbersName
+    oldLineNumbersName = JSON.parse(JSON.stringify(lineNumbersName));
+    let filteredLineNumbersName: PackageDictionary = {};
+    for (const [key, value] of Object.entries(lineNumbersName)) {
+      const numericKey = Number(key);
+      // Check if the package is in the database
+      for (let i = 0; i < value.length; i++) {
+        if (!blockedPythonModules.includes(value[i].packageName)) {
+          if (!filteredLineNumbersName[numericKey]) {
+            filteredLineNumbersName[numericKey] = [value[i]];
+          } else {
+            filteredLineNumbersName[numericKey].push(value[i]);
+          }
+        }
+      }
+    }
+    let filteredlineNumbers = Object.keys(filteredLineNumbersName).map(Number);
+    let filteredlineDecorations = filteredlineNumbers.map((lineNumber) => ({
+      range: new vscode.Range(lineNumber, 0, lineNumber, 0),
+    }));
+    activeEditor.setDecorations(lightDecoration, []);
+    activeEditor.setDecorations(darkDecoration, []);
+    if (currentColorTheme === "light") {
+      activeEditor.setDecorations(lightDecoration, filteredlineDecorations);
+    } else {
+      activeEditor.setDecorations(darkDecoration, filteredlineDecorations);
+    }
+  } else {
+    console.log("No change in lineNumbersName");
+  }
+}
+
 function updateImports(document: vscode.TextDocument) {
   lineNumbersName = extractNames(document);
   lineNumbers = Object.keys(lineNumbersName).map(Number);
@@ -50,21 +294,6 @@ function updateImports(document: vscode.TextDocument) {
     hasImport = true;
   }
 }
-
-/*
-
-function getPackages(document: vscode.TextDocument, lineNumber: number) {
-  updateImports(document);
-  let linePackages = lineNumbersName[lineNumber];
-  console.log(linePackages);
-  let packagesList: string[] = [];
-  linePackages.map((packaged) => packagesList.push(packaged.packageName));
-  const uniquePackages = packagesList.filter((item, index, array) => array.indexOf(item) === index);
-  console.log(uniquePackages);
-  return uniquePackages;
-}
-
-*/
 
 function getModules(document: vscode.TextDocument, lineNumber: number) {
   console.log("line number: " + lineNumber);
@@ -103,7 +332,7 @@ function getModules(document: vscode.TextDocument, lineNumber: number) {
 export function activate(context: vscode.ExtensionContext) {
   // Create the show hello world command
   let dummydata: AddData = {
-    userid: "Pranav",
+    userid: "",
     linetext: "",
     tab: "",
     button: "",
@@ -142,37 +371,15 @@ export function activate(context: vscode.ExtensionContext) {
   if (activeEditor) {
     const { document } = activeEditor;
     updateImports(document);
-
-    // Add decorations to matching lines
-    lineDecorations = lineNumbers.map((lineNumber) => ({
-      range: new vscode.Range(lineNumber, 0, lineNumber, 0),
-    }));
-    if (currentColorTheme === "light") {
-      activeEditor.setDecorations(lightDecoration, lineDecorations);
-    } else {
-      activeEditor.setDecorations(darkDecoration, lineDecorations);
-    }
+    setLineDecorations(activeEditor);
   }
 
   vscode.workspace.onDidChangeTextDocument((event) => {
     const activeEditor = vscode.window.activeTextEditor;
     if (activeEditor && event.document === activeEditor.document) {
       const { document } = activeEditor;
-
-      activeEditor.setDecorations(lightDecoration, []);
-      activeEditor.setDecorations(darkDecoration, []);
-
       updateImports(document);
-
-      // Add decorations to matching lines
-      lineDecorations = lineNumbers.map((lineNumber) => ({
-        range: new vscode.Range(lineNumber, 0, lineNumber, 0),
-      }));
-      if (currentColorTheme === "light") {
-        activeEditor.setDecorations(lightDecoration, lineDecorations);
-      } else {
-        activeEditor.setDecorations(darkDecoration, lineDecorations);
-      }
+      setLineDecorations(activeEditor);
     }
   });
   // End
@@ -183,20 +390,8 @@ export function activate(context: vscode.ExtensionContext) {
     if (editor) {
       const { document } = editor;
 
-      editor.setDecorations(lightDecoration, []);
-      editor.setDecorations(darkDecoration, []);
-
       updateImports(document);
-
-      // Add decorations to matching lines
-      lineDecorations = lineNumbers.map((lineNumber) => ({
-        range: new vscode.Range(lineNumber, 0, lineNumber, 0),
-      }));
-      if (currentColorTheme === "light") {
-        editor.setDecorations(lightDecoration, lineDecorations);
-      } else {
-        editor.setDecorations(darkDecoration, lineDecorations);
-      }
+      setLineDecorations(editor);
     }
   });
 
@@ -215,6 +410,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   const sayMoreCommand = vscode.commands.registerCommand("hug-reports.sayMore", async (args) => {
+    let languageid: string | undefined = activeEditor?.document.languageId;
     if (activeEditor) {
       if (args) {
         if (args.lineNumber) {
@@ -232,6 +428,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (args) {
         console.log("No active editor");
         const document = await vscode.workspace.openTextDocument(args.uri);
+        languageid = document.languageId;
         dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
         console.log("dummy " + dummydata.linetext);
         updateImports(document);
@@ -240,6 +437,13 @@ export function activate(context: vscode.ExtensionContext) {
     }
     dummydata.tab = "form";
     dummydata.button = "form";
+    id = globalState.get("id");
+    if (id) {
+      dummydata.userid = id;
+    }
+    if (languageid) {
+      dummydata.language = languageid;
+    }
     if (currentColorTheme) {
       dummydata.theme = currentColorTheme;
     }
@@ -317,13 +521,6 @@ export function activate(context: vscode.ExtensionContext) {
       console.log("dummy data");
       console.log(dummydata);
       dummydata.modules.forEach(async (module) => {
-        //create a new array that takes module.modules and only pushes the searchModules part of it
-        let searchModules: string[] = [];
-        module.modules.forEach((m) => searchModules.push(m.searchModules));
-        //if search modules is empty, insert ""
-        if (searchModules.length === 0) {
-          searchModules.push("");
-        }
         const thanksResponse = await fetch(`http://${BACKEND}/addThanks`, {
           method: "POST",
           headers: {
@@ -332,7 +529,7 @@ export function activate(context: vscode.ExtensionContext) {
           body: JSON.stringify({
             userid: dummydata.userid,
             packagename: module.packageName,
-            modules: searchModules,
+            modules: [""],
             personalnotes: {
               note1: "Thank you for your contributions.",
               note2: "Great work on the random module!",
