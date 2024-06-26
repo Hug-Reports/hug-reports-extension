@@ -24,7 +24,7 @@ import { Edit16Filled, ArrowUndo16Filled } from "@fluentui/react-icons";
 import type { ComboboxProps } from "@fluentui/react-components";
 import { FaGithub, FaPython } from "react-icons/fa";
 import { MdOutlineEdit } from "react-icons/md";
-import { IoIosSave } from "react-icons/io";
+import { IoIosSave, IoLogoJavascript } from "react-icons/io";
 import { Dismiss12Regular } from "@fluentui/react-icons";
 const globals = require("./front-end-globals");
 const BACKEND = globals.BACKEND;
@@ -117,7 +117,8 @@ const SayMore = ({ lineofcode }) => {
   return (
     <div style={{ width: "100%" }}>
       <div style={{ display: "flex", alignItems: "center" }}>
-        <FaPython />
+        {lineofcode.language === "python" && <FaPython />}
+        {lineofcode.language === "javascript" && <IoLogoJavascript />}
         <h6 style={{ marginLeft: "10px" }}>PACKAGE:</h6>
       </div>
       <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: 0 }}>

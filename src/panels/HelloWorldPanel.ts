@@ -57,7 +57,7 @@ export class HelloWorldPanel {
       // Panel view type
       "showHelloWorld",
       // Panel title
-      "Hello World",
+      "Hug Reports",
       // The editor column the panel should be displayed in
       ViewColumn.Beside,
       // Extra panel configurations
@@ -68,7 +68,7 @@ export class HelloWorldPanel {
         localResourceRoots: [
           Uri.joinPath(extensionUri, "out"),
           Uri.joinPath(extensionUri, "webview-ui/build"),
-          Uri.joinPath(extensionUri, "images")
+          Uri.joinPath(extensionUri, "images"),
         ],
       }
     );
@@ -150,7 +150,7 @@ export class HelloWorldPanel {
           <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
           <meta name="theme-color" content="#000000">
           <link rel="stylesheet" type="text/css" href="${stylesUri}">
-          <title>Hello World</title>
+          <title>Hug Reports</title>
         </head>
         <body>
           <noscript>You need to enable JavaScript to run this app.</noscript>

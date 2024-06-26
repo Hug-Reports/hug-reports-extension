@@ -1,7 +1,13 @@
 import * as vscode from "vscode";
 import { HelloWorldPanel } from "./panels/HelloWorldPanel";
 import Module = require("module");
-import { ModuleType, PackageDictionary, PackageType, extractModules, extractNames } from "./parser/parser";
+import {
+  ModuleType,
+  PackageDictionary,
+  PackageType,
+  extractModules,
+  extractNames,
+} from "./parser/parser";
 const path = require("path");
 const globals = require("../globals");
 const BACKEND = globals.BACKEND;
@@ -255,30 +261,47 @@ async function setLineDecorations(activeEditor: vscode.TextEditor) {
   if (JSON.stringify(lineNumbersName) !== JSON.stringify(oldLineNumbersName)) {
     //copy lineNumbersName to oldLineNumbersName
     oldLineNumbersName = JSON.parse(JSON.stringify(lineNumbersName));
-    let filteredLineNumbersName: PackageDictionary = {};
-    for (const [key, value] of Object.entries(lineNumbersName)) {
-      const numericKey = Number(key);
-      // Check if the package is in the database
-      for (let i = 0; i < value.length; i++) {
-        if (!blockedPythonModules.includes(value[i].packageName)) {
-          if (!filteredLineNumbersName[numericKey]) {
-            filteredLineNumbersName[numericKey] = [value[i]];
-          } else {
-            filteredLineNumbersName[numericKey].push(value[i]);
+    let languageid: string | undefined = activeEditor?.document.languageId;
+    if (languageid === "python") {
+      let filteredLineNumbersName: PackageDictionary = {};
+      for (const [key, value] of Object.entries(lineNumbersName)) {
+        const numericKey = Number(key);
+        // Check if the package is in the database
+        for (let i = 0; i < value.length; i++) {
+          if (!blockedPythonModules.includes(value[i].packageName)) {
+            if (!filteredLineNumbersName[numericKey]) {
+              filteredLineNumbersName[numericKey] = [value[i]];
+            } else {
+              filteredLineNumbersName[numericKey].push(value[i]);
+            }
           }
         }
       }
-    }
-    let filteredlineNumbers = Object.keys(filteredLineNumbersName).map(Number);
-    let filteredlineDecorations = filteredlineNumbers.map((lineNumber) => ({
-      range: new vscode.Range(lineNumber, 0, lineNumber, 0),
-    }));
-    activeEditor.setDecorations(lightDecoration, []);
-    activeEditor.setDecorations(darkDecoration, []);
-    if (currentColorTheme === "light") {
-      activeEditor.setDecorations(lightDecoration, filteredlineDecorations);
+      let filteredlineNumbers = Object.keys(filteredLineNumbersName).map(Number);
+      let filteredlineDecorations = filteredlineNumbers.map((lineNumber) => ({
+        range: new vscode.Range(lineNumber, 0, lineNumber, 0),
+      }));
+      activeEditor.setDecorations(lightDecoration, []);
+      activeEditor.setDecorations(darkDecoration, []);
+      if (currentColorTheme === "light") {
+        activeEditor.setDecorations(lightDecoration, filteredlineDecorations);
+      } else {
+        activeEditor.setDecorations(darkDecoration, filteredlineDecorations);
+      }
     } else {
-      activeEditor.setDecorations(darkDecoration, filteredlineDecorations);
+      if (languageid === "javascript" || languageid === "typescript") {
+        let filteredlineNumbers = Object.keys(lineNumbersName).map(Number);
+        let filteredlineDecorations = filteredlineNumbers.map((lineNumber) => ({
+          range: new vscode.Range(lineNumber, 0, lineNumber, 0),
+        }));
+        activeEditor.setDecorations(lightDecoration, []);
+        activeEditor.setDecorations(darkDecoration, []);
+        if (currentColorTheme === "light") {
+          activeEditor.setDecorations(lightDecoration, filteredlineDecorations);
+        } else {
+          activeEditor.setDecorations(darkDecoration, filteredlineDecorations);
+        }
+      }
     }
   } else {
     console.log("No change in lineNumbersName");
