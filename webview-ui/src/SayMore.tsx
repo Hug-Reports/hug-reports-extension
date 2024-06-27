@@ -109,10 +109,48 @@ const SayMore = ({ lineofcode }) => {
           const { message, thanks } = await thanksResponse.json();
           console.log(message);
         } else {
-          //new url suggested
+          const thanksResponse = await fetch(`http://${BACKEND}/addEditUrlThanks`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userid: lineofcode.userid,
+              packagename: selectedPackage[0].child,
+              modules: thanksModules,
+              personalnotes: {
+                note_1: note1.trim(),
+                note_2: note2.trim(),
+                note_3: note3.trim(),
+              },
+              language: lineofcode.language,
+              githubUrl: editableURL
+            }),
+          });
+          const { message, thanks } = await thanksResponse.json();
+          console.log(message);
         }
       } else {
-        //new url suggested or required
+        const thanksResponse = await fetch(`http://${BACKEND}/addEditUrlThanks`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userid: lineofcode.userid,
+            packagename: selectedPackage[0].child,
+            modules: thanksModules,
+            personalnotes: {
+              note_1: note1.trim(),
+              note_2: note2.trim(),
+              note_3: note3.trim(),
+            },
+            language: lineofcode.language,
+            githubUrl: editableURL
+          }),
+        });
+        const { message, thanks } = await thanksResponse.json();
+        console.log(message);
       }
     }
   };
