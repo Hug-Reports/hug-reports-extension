@@ -27,12 +27,11 @@ Once the sample is open inside VS Code you can run the extension by doing the fo
 ## Usage
 To thank a package you’ve imported into your code file, right click on the 🙌 icon that appears at the start of the line with your import statement. From there, you have the option to select either “Say Thanks” or “Say More”:
 ### Say Thanks ###
-*Send a token of your appreciation!*
+*Send a token of your appreciation!* 
 By clicking "Say Thanks", your appreciation will be sent. You have the option to add a personal note by clicking "Say More" or return to your program by clicking "Cancel".
 
 ### Say More ###
 *Provide a personalized note to contributors.*
-
 Once you click “Say More”, a new webview will appear with a form to fill out:
 1. **Package name.** If you have more than one package imported on you line of code, select one to continue with the rest of the form.
 2. **Module selection.** You can choose to select specific modules you’ve used in your code, or thank the entire package.
