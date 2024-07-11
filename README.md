@@ -13,8 +13,11 @@ Once you click “Say More”, a new webview will appear with a form to fill out
 2. **Module selection.** You can choose to select specific modules you’ve used in your code, or thank the entire package.
 3. **Github URL.** This field displays the URL for the repository of the package. You can edit + save the field if modifications are needed.
      If the extension cannot find the link to the repository, you can add it yourself by editing the field.
-4. **Form fields.** Add your note to the relevant prompt! At least one of the text boxes must be filled out to submit the form.
-5. **Submit.** Click submit to send your gratitude :))
+
+   ![url-gif](https://github.com/Hug-Reports/hug-reports-extension/blob/readme-update/images/readme-media/url-gif.gif)
+
+5. **Form fields.** Add your note to the relevant prompt! At least one of the text boxes must be filled out to submit the form.
+6. **Submit.** Click submit to send your gratitude :))
 
 
 
