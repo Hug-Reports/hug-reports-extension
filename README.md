@@ -11,7 +11,9 @@ By clicking "Say Thanks", your appreciation will be sent. You have the option to
 Once you click “Say More”, a new webview will appear with a form to fill out:
 1. **Package name.** If you have more than one package imported on you line of code, select one to continue with the rest of the form.
 2. **Module selection.** You can choose to select specific modules you’ve used in your code, or thank the entire package.
-3. **Github URL.** This field displays the URL for the repository of the package. You can edit + save the field if modifications are needed.
+   ![module-selection](https://github.com/Hug-Reports/hug-reports-extension/blob/readme-update/images/readme-media/modules1.png)
+   
+4. **Github URL.** This field displays the URL for the repository of the package. You can edit + save the field if modifications are needed.
      If the extension cannot find the link to the repository, you can add it yourself by editing the field.
 
    ![url-gif](https://github.com/Hug-Reports/hug-reports-extension/blob/readme-update/images/readme-media/url-gif.gif)
