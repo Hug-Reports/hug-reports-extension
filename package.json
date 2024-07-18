@@ -31,10 +31,6 @@
       {
         "command": "hug-reports.sayMore",
         "title": "Say More"
-      },
-      {
-        "command": "hug-reports.openDashboard",
-        "title": "Open Dashboard"
       }
     ],
     "menus": {
@@ -48,12 +44,6 @@
         {
           "command": "hug-reports.sayMore",
           "title": "Say More",
-          "group": "navigation",
-          "when": "hug-reports.hasImport"
-        },
-        {
-          "command": "hug-reports.openDashboard",
-          "title": "Open Dashboard",
           "group": "navigation",
           "when": "hug-reports.hasImport"
         }
