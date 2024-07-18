@@ -16,13 +16,13 @@ Once you click “Say More”, a new webview will appear with a form to fill out
    ![module-selection](https://github.com/Hug-Reports/hug-reports-extension/blob/readme-update/images/readme-media/modules1.png)
    
 3. **Github URL.** This field displays the URL for the repository of the package. You can edit + save the field if modifications are needed.
-   
+   ![module-selection](https://github.com/Hug-Reports/hug-reports-extension/blob/readme-update/images/readme-media/url.png)
      If the extension cannot find the link to the repository, you can add it yourself by editing the field.
    ![url-gif](https://github.com/Hug-Reports/hug-reports-extension/blob/readme-update/images/readme-media/url-gif.gif)
 
-5. **Form fields.** Add your note to the relevant prompt! At least one of the text boxes must be filled out to submit the form.
+4. **Form fields.** Add your note to the relevant prompt! At least one of the text boxes must be filled out to submit the form.
    
-6. **Submit.** Click submit to send your gratitude :))
+5. **Submit.** Click submit to send your gratitude :))
 
 
 
