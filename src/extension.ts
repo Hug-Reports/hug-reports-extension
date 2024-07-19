@@ -494,38 +494,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  const openDashboardCommand = vscode.commands.registerCommand(
-    "hug-reports.openDashboard",
-    async (args) => {
-      if (activeEditor) {
-        if (args) {
-          if (args.lineNumber) {
-            console.log("Line number: " + args.lineNumber);
-            dummydata.linetext = activeEditor.document.lineAt(args.lineNumber - 1).text;
-            console.log("dummy " + dummydata.linetext);
-          }
-        }
-        let document = activeEditor.document;
-        updateImports(document);
-        dummydata.modules = getModules(document, args.lineNumber - 1);
-      }
-      if (!activeEditor) {
-        if (args) {
-          console.log("No active editor");
-          const document = await vscode.workspace.openTextDocument(args.uri);
-          dummydata.linetext = document.lineAt(args.lineNumber - 1).text;
-          updateImports(document);
-          dummydata.modules = getModules(document, args.lineNumber - 1);
-        }
-      }
-      dummydata.tab = "recently thanked";
-      dummydata.button = "dashboard";
-      console.log("dummy data");
-      console.log(dummydata);
-      HelloWorldPanel.render(context.extensionUri, dummydata);
-    }
-  );
-
   const sayThanksCommand = vscode.commands.registerCommand(
     "hug-reports.sayThanks",
     async (args) => {
@@ -621,7 +589,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(showHelloWorldCommand);
   context.subscriptions.push(sayThanksCommand);
   context.subscriptions.push(sayMoreCommand);
-  context.subscriptions.push(openDashboardCommand);
 }
 
 export function deactivate() {
