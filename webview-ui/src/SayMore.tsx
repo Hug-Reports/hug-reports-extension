@@ -29,7 +29,7 @@ import { BiMailSend } from "react-icons/bi";
 const globals = require("./front-end-globals");
 const BACKEND = globals.BACKEND;
 
-const SayMore = ({ lineofcode }) => {
+const SayMore = ({ lineofcode, setSubmitted }) => {
   const [selectedPackage, setSelectedPackage] = useState(
     lineofcode.modules.map((item, index) => ({ value: index, child: item.packageName }))
   );
@@ -63,7 +63,7 @@ const SayMore = ({ lineofcode }) => {
 
   //define an async function
   const fetchGithubUrl = async (packagename) => {
-    const linkResponse = await fetch(`http://${BACKEND}/getGithub`, {
+    const linkResponse = await fetch(`https://${BACKEND}/getGithub`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -89,7 +89,7 @@ const SayMore = ({ lineofcode }) => {
     if (githubUrl !== "") {
       if (githubUrl !== "No GitHub URL found") {
         if (editableURL === githubUrl) {
-          const thanksResponse = await fetch(`http://${BACKEND}/addThanks`, {
+          const thanksResponse = await fetch(`https://${BACKEND}/addThanks`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -153,6 +153,7 @@ const SayMore = ({ lineofcode }) => {
         console.log(message);
       }
     }
+    setSubmitted(true);
   };
 
   useEffect(() => {
