@@ -1,1 +1,1 @@
-module.exports.BACKEND = "localhost:5000";
+module.exports.BACKEND = "test";

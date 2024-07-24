@@ -581,7 +581,7 @@ export function activate(context: vscode.ExtensionContext) {
         console.log("dummy data");
         console.log(dummydata);
         dummydata.modules.forEach(async (module) => {
-          const thanksResponse = await fetch(`http://${BACKEND}/addThanks`, {
+          const thanksResponse = await fetch(`https://${BACKEND}/addThanks`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -643,7 +643,7 @@ async function createUserMongoDB() {
   let insertedId: string | undefined;
 
   try {
-    const userAddedResponse = await fetch(`http://${BACKEND}/addUser`, {
+    const userAddedResponse = await fetch(`https://${BACKEND}/addUser`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
