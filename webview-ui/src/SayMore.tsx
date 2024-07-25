@@ -109,7 +109,7 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
           const { message, thanks } = await thanksResponse.json();
           console.log(message);
         } else {
-          const thanksResponse = await fetch(`http://${BACKEND}/addEditUrlThanks`, {
+          const thanksResponse = await fetch(`https://${BACKEND}/addEditUrlThanks`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -124,14 +124,14 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
                 note_3: note3.trim(),
               },
               language: lineofcode.language,
-              githubUrl: editableURL
+              githubUrl: editableURL,
             }),
           });
           const { message, thanks } = await thanksResponse.json();
           console.log(message);
         }
       } else {
-        const thanksResponse = await fetch(`http://${BACKEND}/addEditUrlThanks`, {
+        const thanksResponse = await fetch(`https://${BACKEND}/addEditUrlThanks`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -146,7 +146,7 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
               note_3: note3.trim(),
             },
             language: lineofcode.language,
-            githubUrl: editableURL
+            githubUrl: editableURL,
           }),
         });
         const { message, thanks } = await thanksResponse.json();
