@@ -1,8 +1,24 @@
 {
   "name": "hug-reports",
   "displayName": "Hug Reports",
+  "publisher": "hug-reports",
   "description": "Express appreciation to open source contributors",
   "version": "1.0.0",
+  "icon": "images/logo.png",
+  "galleryBanner": {
+    "color": "#FFFFFF",
+    "theme": "light"
+  },
+  "pricing": "Free",
+  "bugs": {
+    "url": "https://github.com/Hug-Reports/hug-reports-extension/issues",
+    "email": "pkhadpe@andrew.cmu.edu"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hug-Reports/hug-reports-extension.git"
+  },
+  "homepage": "https://github.com/Hug-Reports/hug-reports-extension/blob/main/README.md",
   "files": [
     "images/*.png"
   ],
