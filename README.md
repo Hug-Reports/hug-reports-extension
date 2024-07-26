@@ -1,17 +1,14 @@
-<p align="center">
-    <img src="images/logo.png" alt="" width="40%" align="top" style="border-radius: 10px; padding-left: 120px; padding-right: 120px;">
-</p>
-
-<p align="center">
-  <em><strong>Hug Reports</strong>: Supporting Expression of Appreciation between Users and
-Contributors of Open Source Software Packages <br></em>
-</p>
-
 <div align="center">
+
+<img src="images/logo.png" alt="" width="40%" align="top" style="border-radius: 10px; padding-left: 120px; padding-right: 120px;">
 
 ![GitHub License](https://img.shields.io/github/license/Hug-Reports/hug-reports-extension)
 <a href="https://marketplace.visualstudio.com/items?itemName=hug-reports.hug-reports">![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/hug-reports.hug-reports)
 </a>
+
+# Hug Reports
+
+Hug Reports is a Visual Studio Code extension designed to make it easier to express appreciation to contributors of the packages you rely on.
 
 </div>
 
