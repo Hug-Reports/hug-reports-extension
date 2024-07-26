@@ -1,30 +1,45 @@
-# Hug Reports Extension
+<p align="center">
+    <img src="images/logo.png" alt="" width="40%" align="top" style="border-radius: 10px; padding-left: 120px; padding-right: 120px;">
+</p>
+
+<p align="center">
+  <em><strong>Hug Reports</strong>: Supporting Expression of Appreciation between Users and
+Contributors of Open Source Software Packages <br></em>
+</p>
+
+<div align="center">
+
+![GitHub License](https://img.shields.io/github/license/Hug-Reports/hug-reports-extension)
+<a href="https://marketplace.visualstudio.com/items?itemName=hug-reports.hug-reports">![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/hug-reports.hug-reports)
+</a>
+
+</div>
 
 ## Usage
+
 To thank a package you’ve imported into your code file, right click on the 🙌 icon that appears at the start of the line with your import statement. From there, you have the option to select either “Say Thanks” or “Say More”:
-![click-icon](https://github.com/Hug-Reports/hug-reports-extension/blob/moveImages/images/click-gif.gif)
-### Say Thanks ###
-*Send a token of your appreciation!* 
+![click-icon](images/click-gif.gif)
+
+### Say Thanks
+
+_Send a token of your appreciation!_
 By clicking "Say Thanks", your appreciation will be sent. You have the option to add a personal note by clicking "Say More" or return to your program by clicking "Cancel".
 
-### Say More ###
-*Provide a personalized note to contributors.*
+### Say More
+
+_Provide a personalized note to contributors._
 Once you click “Say More”, a new webview will appear with a form to fill out:
+
 1. **Package name.** If you have more than one package imported on you line of code, select one to continue with the rest of the form.
-   
 2. **Module selection.** You can choose to select specific modules you’ve used in your code, or thank the entire package.
-   ![module-selection](https://github.com/Hug-Reports/hug-reports-extension/blob/moveImages/images/modules1.png)
-   
+   ![module-selection](images/modules1.png)
 3. **Github URL.** This field displays the URL for the repository of the package. You can edit + save the field if modifications are needed.
-   ![module-selection](https://github.com/Hug-Reports/hug-reports-extension/blob/moveImages/images/url.png)
-     If the extension cannot find the link to the repository, you can add it yourself by editing the field.
-   ![url-gif](https://github.com/Hug-Reports/hug-reports-extension/blob/moveImages/images/url-gif.gif)
+   ![module-selection](images/url.png)
+   If the extension cannot find the link to the repository, you can add it yourself by editing the field.
+   ![url-gif](images/url-gif.gif)
 
 4. **Form fields.** Add your note to the relevant prompt! At least one of the text boxes must be filled out to submit the form.
-   
-5. **Submit.** Click submit to send your gratitude :))
-
-
+5. **Submit.** Click submit to send your gratitude
 
 ## Run The Sample
 
