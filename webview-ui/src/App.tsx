@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./App.css";
 import SayMore from "./SayMore";
 import { Text } from "@fluentui/react-components";
-import MovingComponent from "react-moving-text";
+// import MovingComponent from "react-moving-text";
 
 declare global {
   interface Window {

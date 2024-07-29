@@ -27,7 +27,7 @@ export function extractNames(document: vscode.TextDocument) {
       const importStatement = match[1].trim();
       createPythonPackageObject(lineNumber, importStatement, packageDictionary);
     }
-  } else if (document.languageId === "javascript" || document.languageId === "typescript") {
+  } else if (document.languageId === "javascript" || document.languageId === "typescript" || document.languageId === "typescriptreact") {
     const jsImportRegex =
       /^import\s+(?:(?:[,\w*\s{}]*\s+from\s+)?["'][^\."'][^"']+["']|\s*["'][^\."'][^"']+["'])\s*;?/gm;
     while ((match = jsImportRegex.exec(document.getText()))) {
@@ -49,7 +49,7 @@ export function extractModules(
   let moduleMatches: ModuleType[] = [];
   if (document.languageId === "python") {
     moduleMatches = extractModulesPython(document, alias, modulesList, aliasList);
-  } else if (document.languageId === "javascript" || document.languageId === "typescript") {
+  } else if (document.languageId === "javascript" || document.languageId === "typescript" || document.languageId === "typescriptreact") {
     moduleMatches = extractModulesJS(document, alias, modulesList, aliasList);
   }
   return moduleMatches;
