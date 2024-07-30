@@ -3,7 +3,7 @@
   "displayName": "Hug Reports",
   "publisher": "hug-reports",
   "description": "Express appreciation to open source contributors",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "icon": "images/logo.png",
   "galleryBanner": {
     "color": "#FFFFFF",
@@ -28,7 +28,8 @@
   "activationEvents": [
     "onLanguage:python",
     "onLanguage:typescript",
-    "onLanguage:javascript"
+    "onLanguage:javascript",
+    "onLanguage:typescriptreact"
   ],
   "main": "./out/extension.js",
   "contributes": {
