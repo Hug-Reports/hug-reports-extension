@@ -289,7 +289,12 @@ async function setLineDecorations(activeEditor: vscode.TextEditor) {
         activeEditor.setDecorations(darkDecoration, filteredlineDecorations);
       }
     } else {
-      if (languageid === "javascript" || languageid === "typescript" || languageid === "typescriptreact") {
+      if (
+        languageid === "javascript" ||
+        languageid === "typescript" ||
+        languageid === "typescriptreact" ||
+        languageid === "javascriptreact"
+      ) {
         let filteredlineNumbers = Object.keys(lineNumbersName).map(Number);
         let filteredlineDecorations = filteredlineNumbers.map((lineNumber) => ({
           range: new vscode.Range(lineNumber, 0, lineNumber, 0),
@@ -446,7 +451,12 @@ export function activate(context: vscode.ExtensionContext) {
       if (args.lineNumber - 1 in filteredLineNumbersName) {
         test = true;
       }
-    } else if (languageid === "javascript" || languageid === "typescript" || languageid === "typescriptreact") {
+    } else if (
+      languageid === "javascript" ||
+      languageid === "typescript" ||
+      languageid === "typescriptreact" ||
+      languageid === "javascriptreact"
+    ) {
       if (args.lineNumber - 1 in lineNumbersName) {
         test = true;
       }
@@ -510,7 +520,12 @@ export function activate(context: vscode.ExtensionContext) {
         if (args.lineNumber - 1 in filteredLineNumbersName) {
           test = true;
         }
-      } else if (languageid === "javascript" || languageid === "typescript" || languageid === "typescriptreact") {
+      } else if (
+        languageid === "javascript" ||
+        languageid === "typescript" ||
+        languageid === "typescriptreact" ||
+        languageid === "javascriptreact"
+      ) {
         if (args.lineNumber - 1 in lineNumbersName) {
           test = true;
         }

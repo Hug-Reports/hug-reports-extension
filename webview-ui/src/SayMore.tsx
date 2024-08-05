@@ -54,7 +54,12 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
       setEditableURL(
         "We were unable to find the GitHub URL for this package from the Python Package Index."
       );
-    } else if (lineofcode.language == "javascript") {
+    } else if (
+      lineofcode.language == "javascript" ||
+      lineofcode.language == "typescript" ||
+      lineofcode.language == "typescriptreact" ||
+      lineofcode.language == "javascriptreact"
+    ) {
       setEditableURL(
         "We were unable to find the GitHub URL for this package from the npm registry."
       );
@@ -63,7 +68,7 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
 
   //define an async function
   const fetchGithubUrl = async (packagename) => {
-    const linkResponse = await fetch(`https://${BACKEND}/getGithub`, {
+    const linkResponse = await fetch(`http://${BACKEND}/getGithub`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -89,7 +94,7 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
     if (githubUrl !== "") {
       if (githubUrl !== "No GitHub URL found") {
         if (editableURL === githubUrl) {
-          const thanksResponse = await fetch(`https://${BACKEND}/addThanks`, {
+          const thanksResponse = await fetch(`http://${BACKEND}/addThanks`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -109,7 +114,7 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
           const { message, thanks } = await thanksResponse.json();
           console.log(message);
         } else {
-          const thanksResponse = await fetch(`https://${BACKEND}/addEditUrlThanks`, {
+          const thanksResponse = await fetch(`http://${BACKEND}/addEditUrlThanks`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -131,7 +136,7 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
           console.log(message);
         }
       } else {
-        const thanksResponse = await fetch(`https://${BACKEND}/addEditUrlThanks`, {
+        const thanksResponse = await fetch(`http://${BACKEND}/addEditUrlThanks`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -164,7 +169,12 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
           setEditableURL(
             "We were unable to find the GitHub URL for this package from the Python Package Index."
           );
-        } else if (lineofcode.language == "javascript") {
+        } else if (
+          lineofcode.language == "javascript" ||
+          lineofcode.language == "typescript" ||
+          lineofcode.language == "typescriptreact" ||
+          lineofcode.language == "javascriptreact"
+        ) {
           setEditableURL(
             "We were unable to find the GitHub URL for this package from the npm registry."
           );
@@ -201,7 +211,10 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
     <div style={{ width: "100%" }}>
       <div style={{ display: "flex", alignItems: "center" }}>
         {lineofcode.language === "python" && <FaPython />}
-        {lineofcode.language === "javascript" && <IoLogoJavascript />}
+        {(lineofcode.language === "javascript" ||
+          lineofcode.language === "typescript" ||
+          lineofcode.language === "typescriptreact" ||
+          lineofcode.language === "javascriptreact") && <IoLogoJavascript />}
         <h6 style={{ marginLeft: "10px" }}>PACKAGE:</h6>
       </div>
       <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: 0 }}>
@@ -430,7 +443,10 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
                             </em>
                           </Text>
                         )}
-                        {lineofcode.language === "javascript" && (
+                        {(lineofcode.language === "javascript" ||
+                          lineofcode.language === "typescript" ||
+                          lineofcode.language === "typescriptreact" ||
+                          lineofcode.language === "javascriptreact") && (
                           <Text size={100}>
                             <em>
                               URL should have format:
@@ -463,7 +479,10 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
                       </em>
                     </Text>
                   )}
-                  {lineofcode.language == "javascript" && (
+                  {(lineofcode.language === "javascript" ||
+                    lineofcode.language === "typescript" ||
+                    lineofcode.language === "typescriptreact" ||
+                    lineofcode.language === "javascriptreact") && (
                     <Text size={100}>
                       <em>
                         We retrieve GitHub links for the package using the npm registry and user
