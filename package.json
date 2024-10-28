@@ -3,7 +3,7 @@
   "displayName": "Hug Reports",
   "publisher": "hug-reports",
   "description": "Express appreciation to open source contributors",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "icon": "images/logo.png",
   "galleryBanner": {
     "color": "#FFFFFF",
