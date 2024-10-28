@@ -68,7 +68,7 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
 
   //define an async function
   const fetchGithubUrl = async (packagename) => {
-    const linkResponse = await fetch(`http://${BACKEND}/getGithub`, {
+    const linkResponse = await fetch(`https://${BACKEND}/getGithub`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -94,7 +94,7 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
     if (githubUrl !== "") {
       if (githubUrl !== "No GitHub URL found") {
         if (editableURL === githubUrl) {
-          const thanksResponse = await fetch(`http://${BACKEND}/addThanks`, {
+          const thanksResponse = await fetch(`https://${BACKEND}/addThanks`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -114,7 +114,7 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
           const { message, thanks } = await thanksResponse.json();
           console.log(message);
         } else {
-          const thanksResponse = await fetch(`http://${BACKEND}/addEditUrlThanks`, {
+          const thanksResponse = await fetch(`https://${BACKEND}/addEditUrlThanks`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -136,7 +136,7 @@ const SayMore = ({ lineofcode, setSubmitted }) => {
           console.log(message);
         }
       } else {
-        const thanksResponse = await fetch(`http://${BACKEND}/addEditUrlThanks`, {
+        const thanksResponse = await fetch(`https://${BACKEND}/addEditUrlThanks`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
